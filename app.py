@@ -11,17 +11,15 @@ from py2neo import Graph # v2.0.8
 app = Flask(__name__)
 
 #database connect
-graph = Graph()
-cypher = graph.cypher
-#tx = cypher.begin()
+graph = Graph(password="origami abase squander costive")
+
 
 @app.route('/')
 def index():
 
-    recordList = cypher.execute("MATCH (a:Asset) return a")
-    x = recordList
+    graph.run("MATCH (a) return a")
 
-    return render_template("index.html", paragraph=type(recordList), x=x)
+    return render_template("index.html",data="This is data")
 
 @app.route('/tx', methods=['POST'])
 def tx():
@@ -29,11 +27,7 @@ def tx():
     model = request.form['model']
 
     statement = "MERGE (asset:Asset {model:{model}}) MERGE (owner:Person {name:{owner}}) MERGE (owner)-[:OWNS]->(asset)"
-    #tx.append(statement, model=model, owner=owner)
-    cypher.execute(statement, model=model, owner=owner)
-
-    # tx.process()
-    # tx.commit()
+    graph.data(statement, model=model, owner=owner)
 
     return render_template('results.html',owner=owner, model=model)
 

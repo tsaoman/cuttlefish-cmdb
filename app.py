@@ -18,12 +18,13 @@ cypher = graph.cypher
 @app.route('/')
 def index():
 
-    records = cypher.execute("MATCH (a:Asset) return a")
+    recordList = cypher.execute("MATCH (a:Asset) return a")
+    x = recordList
 
-    return render_template("index.html", paragraph=records)
+    return render_template("index.html", paragraph=type(recordList), x=x)
 
-@app.route('/hello', methods=['POST'])
-def hello():
+@app.route('/tx', methods=['POST'])
+def tx():
     owner = request.form['owner']
     model = request.form['model']
 

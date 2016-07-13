@@ -23,12 +23,12 @@
 
   <div class="container">
 
-  <h3>Cuttlefish CMDB</h3>
+  <h1>Cuttlefish CMDB</h1>
 
     <div class="row">
       <div class="col-md-6">
 
-          <form method="POST" action="{{ url_for('hello') }}">
+          <form method="POST" action="{{ url_for('tx') }}">
             Owner:<br/>
             <input type="text" name="owner"><br/><br/>
 
@@ -38,15 +38,34 @@
             <input type="submit" value="Submit">
 
           </form>
-
-      </div>
+      </div> <!-- end col1 -->
 
       <div class="col-md6">
         <p>{{ paragraph }}</p>
-      </div>
 
-    </div>
-  </div>
+
+        <table>
+          <thead>
+            <th>Number</th>
+            <th>Value</th>
+          </thead>
+
+          <tbody>
+            {% for row in x %}
+
+            <tr>
+              <td>{{ row }}</td>
+              <td> Null </td>
+            </tr>
+
+            {% endfor %}
+          </tbody>
+        </table>
+
+      </div> <!-- end col2 -->
+
+    </div><!-- end row -->
+  </div><!-- end container -->
 
 </body>
 </html>

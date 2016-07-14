@@ -7,31 +7,15 @@ class AppTestCase(unittest.TestCase):
 
     #setup
     def setUp(self):
-        self.db_fd, app.app.config['DATABASE'] = tempfile.mkstemp()
-        app.app.config['TESTING'] = True
         self.app = app.app.test_client()
 
-        #don't know if necessary...
-        # with app.app.app_context():
-        #     app.init_db()
+    def testPostandAssetAdd(self):
+        rv = self.app.post('/tx', data=dict(owner="Testivus",model="Skynet"),follow_redirects=True)
+        unittest.TestCase.assertEqual(self,str(rv),'<Response streamed [200 OK]>','POST Failed')
 
-    def tearDown(self):
-        os.close(self.db_fd)
-        os.unlink(app.app.config['DATABASE'])
+    # def testDBPersistence(self):
+    #     rv = self.app.get('/api/results/Testuvus')
+    #     print (rv)
 
-    #=======#
-    # TESTS #
-    #=======#
-
-    def tx(self,owner,model):
-        self.app.post('/tx',data=dict(owner=owner,model=model),follow_redirects=True)
-
-    def test_tx(self):
-        rv = self.tx('Joy','MacBookAir')
-
-
-
-# if __name__ == '__main__':
-#     unittest.main()
 suite = unittest.TestLoader().loadTestsFromTestCase(AppTestCase)
 unittest.TextTestRunner(verbosity=2).run(suite)

@@ -37,13 +37,24 @@ def tx():
     return render_template('results.html',paragraph=paragraph)
 
 
-@app.route('/api/return/person/<person>',methods=['POST','GET'])
+@app.route('/api/return/person/<person>',methods=['GET'])
 def returnPerson(person):
 
-    statement = "MATCH (a {name:{person}}) RETURN a"
+    statement = "MATCH (a:Person {name:{person}}) RETURN a"
     data = graph.data(statement,person=person)[0]['a']
 
     return str(data)
+
+@app.route('/api/return/asset/<asset>',methods=['GET'])
+def returnAsset(asset):
+
+    statement = "MATCH (a:Asset {model:{asset}}) RETURN a"
+    data = graph.data(statement,asset=asset)[0]['a']
+
+    return str(data)
+
+
+
 
 #=====#
 # RUN #

@@ -11,7 +11,7 @@ class AppTestCase(unittest.TestCase):
 
     def testPOSTandDBUpdate(self):
         rv = self.app.post('/tx', data=dict(owner="Testivus",model="Skynet"),follow_redirects=True)
-        unittest.TestCase.assertEqual(self,str(rv),'<Response streamed [200 OK]>','POST Failed')
+        unittest.TestCase.assertEqual(self,rv.status_code,200)
 
         rv = self.app.get('/api/return/person/Testivus')
         unittest.TestCase.assertIn(self,'Testivus',rv.get_data(as_text=True))

@@ -36,7 +36,6 @@ def tx():
     paragraph = "Hello " + owner + ", here is your " + model
     return render_template('results.html',paragraph=paragraph)
 
-
 @app.route('/api/return/person/<person>',methods=['GET'])
 def returnPerson(person):
 
@@ -52,9 +51,6 @@ def returnAsset(asset):
     data = graph.data(statement,asset=asset)[0]['a']
 
     return str(data)
-
-
-
 
 #=====#
 # RUN #

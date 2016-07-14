@@ -42,9 +42,26 @@
 
       </div> <!-- end col1 -->
 
-      <div class="col-md6">
+      <div class="col-md-6">
+
         <h2>Asset Data</h2>
-        {{ data }}
+
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Asset</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            {% for row in data %}
+            <tr>
+              <td>{{ row['a'] }}</td>
+            </tr>
+            {% endfor %}
+
+          </tbody>
+        </table>
 
       </div> <!-- end col2 -->
 

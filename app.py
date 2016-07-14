@@ -20,9 +20,9 @@ graph = Graph(password="origami abase squander costive")
 @app.route('/')
 def index():
 
-    data = graph.data("MATCH (a) RETURN a")
+    data = graph.data("MATCH (a:Asset) RETURN a")
 
-    return render_template("index.html",data=data[0])
+    return render_template("index.html",data=data)
 
 #add new assets / items
 @app.route('/tx', methods=['POST'])

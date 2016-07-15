@@ -1,5 +1,5 @@
 # Cuttlefish CMDB
-Configuration Management Database leveraging Neo4j (graph database). Represents networks as they exist irl. 
+Configuration Management Database leveraging Neo4j (graph database). Represents networks as they exist in real life.
 
 This project is still in its fetal stage. The majority of it is untested. I would also avoid storing sensitive data until auth is added.
 

@@ -1,8 +1,12 @@
 # Cuttlefish CMDB
 Configuration Management Database leveraging Neo4j (graph database). Represents networks as they exist irl. 
 
-This project is still in its fetal stage... it barely has a skeleton and doesn't really do anything... yet.
+This project is still in its fetal stage. The majority of it is untested. I would also avoid storing sensitive data until auth is added.
+
+## Current functionality
+
+You can add an asset and its owner, and see it displayed in the asset list. These are stored in a Neo4j database. So basically, this doesn't do anything you can't already do with Neo4j and Cypher. Unless of course you don't know Cypher. 
 
 ## Testing
 
-Warning: Testing will clear the local Neo4j database. Do not test if you have important data loaded.
+Warning: Testing will clear the local Neo4j database. Do not test if you have important data loaded. Not that users should be testing things anyway.

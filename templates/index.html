@@ -45,7 +45,7 @@
               <td>{{ row['a']['ip'] }}</td>
               <td>{{ row['a']['serial'] }}</td>
               <td>{{ row['b']['name'] }}</td>
-              <td><a class="btn btn-primary" href="/api/return/asset/{{ row['a']['model'] }}" role="button">Inspect</a></td>
+              <td><a href="/api/return/asset/{{ row['a']['model'] }}">Inspect</a></td>
             </tr>
             {% endfor %}
           </tbody>

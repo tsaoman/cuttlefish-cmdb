@@ -10,3 +10,11 @@ You can add an asset and its owner, and see it displayed in the asset list. Thes
 ## Testing
 
 Warning: Testing will clear the local Neo4j database. Do not test if you have important data loaded. Not that users should be testing things anyway.
+
+## Licence / Copyright
+
+This project is not yet under an open source licence, though one will be provisioned soon.
+
+Copyright 2016 Brandon Tsao
+
+

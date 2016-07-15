@@ -20,7 +20,7 @@ graph = Graph(password="origami abase squander costive")
 @app.route('/')
 def index():
 
-    data = graph.data("MATCH (a:Asset) RETURN a")
+    data = graph.data("MATCH (b:Person)-[:OWNS]->(a:Asset) RETURN a,b")
 
     return render_template("index.html",data=data)
 

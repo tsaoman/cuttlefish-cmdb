@@ -22,11 +22,38 @@
 
 
   <div class="container">
-
-  <h1>Cuttlefish CMDB</h1>
-
+    <h1>Cuttlefish CMDB</h1>
     <div class="row">
-      <div class="col-md-6">
+
+      <div class="col-md-8">
+        <h2>Asset Data</h2>
+
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>IP</th>
+              <th>Serial</th>
+              <th>Owner</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in data %}
+            <tr>
+              <td>{{ row['a']['model'] }}</td>
+              <td>{{ row['a']['ip'] }}</td>
+              <td>{{ row['a']['serial'] }}</td>
+              <td>{{ row['b']['name'] }}</td>
+              <td><a class="btn btn-primary" href="/api/return/asset/{{ row['a']['model'] }}" role="button">Inspect</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div> <!-- end col -->
+
+
+      <div class="col-md-4">
         <h2>Add Asset</h2>
 
           <form method="POST" action="{{ url_for('tx') }}">
@@ -40,30 +67,7 @@
 
           </form>
 
-      </div> <!-- end col1 -->
-
-      <div class="col-md-6">
-
-        <h2>Asset Data</h2>
-
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th>Asset</th>
-            </tr>
-          </thead>
-          <tbody>
-
-            {% for row in data %}
-            <tr>
-              <td>{{ row['a'] }}</td>
-            </tr>
-            {% endfor %}
-
-          </tbody>
-        </table>
-
-      </div> <!-- end col2 -->
+      </div> <!-- end col -->
 
     </div><!-- end row -->
   </div><!-- end container -->

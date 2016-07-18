@@ -50,7 +50,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <body class="body">
 
-
   <div class="container">
     <h1>Cuttlefish CMDB</h1>
     <div class="row">
@@ -71,18 +70,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <tbody>
             {% for row in data %}
             <tr>
-              <td>{{ row['a']['model'] }}</td>
-              <td>{{ row['a']['ip'] }}</td>
-              <td>{{ row['a']['serial'] }}</td>
-              <td>{{ row['b']['name'] }}</td>
+              <td>{{ row['asset']['model'] }}</td>
+              <td>{{ row['asset']['ip'] }}</td>
+              <td>{{ row['asset']['serial'] }}</td>
+              <td>{{ row['person']['name'] }}</td>
               <td>
                 <div class="dropdown">
                   <button class="btn btn-primary btn-xs dropdown-toggle" type="button" data-toggle="dropdown">Inspect
                   <span class="caret"></span></button>
                   <ul class="dropdown-menu">
                     <li class="dropdown-header">View</li>
-                    <li><a href="/api/return/asset/{{ row['a']['model'] }}">View Asset</a></li>
-                    <li><a href="/api/return/person/{{ row['b']['name'] }}">View Owner</a></li>
+                    <li><a href="/api/return/asset/{{ row['asset']['model'] }}">View Asset</a></li>
+                    <li><a href="/api/return/person/{{ row['person']['name'] }}">View Owner</a></li>
                     <li class="divider"></li>
                     <li class="dropdown-header">Delete</li>
                     <li><a href="#">Delete Asset</a></li>

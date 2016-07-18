@@ -26,5 +26,5 @@ This project is licensed under GNU AGPLv3. It can be found LICENSE.txt.
 
 ## Contact
 
-Author: Brandon Tsao.
+Author: Brandon Tsao.  
 Email: BrandonSTsao@gmail.com

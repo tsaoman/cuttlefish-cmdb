@@ -25,26 +25,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   <meta name="viewport" content = "width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-  <!-- JQuery -->
-  <script src="//code.jquery.com/jquery-1.12.3.js"></script>
+  <!-- Boostrap / Datatables CDN -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs-3.3.6/jqc-1.12.3/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.1/b-colvis-1.2.1/b-html5-1.2.1/b-print-1.2.1/fc-3.2.2/sc-1.4.2/datatables.min.css"/>
+  <script type="text/javascript" src="https://cdn.datatables.net/v/bs-3.3.6/jqc-1.12.3/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.1/b-colvis-1.2.1/b-html5-1.2.1/b-print-1.2.1/fc-3.2.2/sc-1.4.2/datatables.min.js"></script>
 
-  <!-- Boostrap CDN -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
-
-  <!-- Data tables -->
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
-  <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
-  <script src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
   <script>$(document).ready(function() {
-    $('#assets').DataTable( {
+    var table = $('#assets').DataTable( {
+      "lengthChange": false,
+      "buttons": [ 'excel', 'pdf', 'colvis' ],
       "order": [],
       "columnDefs": [ {
         "targets"  : 'no-sort',
         "orderable": false,
-    }]
-  });} );</script><!-- JQuery for datatable -->
+      }]
+    } );
+
+    table.buttons().container().appendTo('#assets_wrapper .col-sm-6:eq(0)');
+
+  } );</script><!-- JQuery for datatable -->
 
 </head>
 
@@ -61,8 +59,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <thead>
             <tr>
               <th>Model</th>
+              <th>Manufacturer</th>
               <th>IP</th>
               <th>Serial</th>
+              <th>Date Issued</th>
               <th>Owner</th>
               <th class="no-sort"></th>
             </tr>
@@ -71,8 +71,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             {% for row in data %}
             <tr>
               <td>{{ row['asset']['model'] }}</td>
+              <td>{{ row['asset']['manufacturer'] }}</td>
               <td>{{ row['asset']['ip'] }}</td>
               <td>{{ row['asset']['serial'] }}</td>
+              <td>{{ row['asset']['date_issued'] }}</td>
               <td>{{ row['person']['name'] }}</td>
               <td>
                 <div class="dropdown">

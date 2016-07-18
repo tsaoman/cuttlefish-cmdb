@@ -12,6 +12,7 @@ You can add an asset and its owner, and see it displayed in the asset list. Thes
 Loosely ordered by priority
 
 - Add more asset / person attributes
+- Change pagination to scrolling
 - Allow deleting assets / owner
 - Allow editing asset / owner information
 - bootstrap / datatables: CDN to local

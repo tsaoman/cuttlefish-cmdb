@@ -10,16 +10,13 @@ As of now, Cuttlefish is just a fancy datastore. You can add an asset and its ow
 ##TBD
 
 Major updates, loosely ordered by priority, include
+- allow editing of asset / owner information
 - graph visualization of networks
-- automatically adding assets via a network scan.
+- automatically adding assets via a network scan or uploading of network logs
 - Adding users via some directory API is also on my list.
 
 Small changes, loosely ordered by priority, include
-- Add more asset / person attributes
-- Allow deleting assets / owner
-- Allow editing asset / owner information
 - bootstrap / datatables: CDN to local
-- Upload / scan features - allow for uploading of logs or scanning of network
 
 ## Testing
 

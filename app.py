@@ -72,7 +72,6 @@ def assetDeleteByInternalID(internalID):
 
     return redirect("/")
 
-
 # GET
 @app.route('/api/return/person/<person>',methods=['GET'])
 def returnPerson(person):

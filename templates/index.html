@@ -29,34 +29,46 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs-3.3.6/jqc-1.12.3/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.1/b-colvis-1.2.1/b-html5-1.2.1/b-print-1.2.1/fc-3.2.2/sc-1.4.2/datatables.min.css"/>
   <script type="text/javascript" src="https://cdn.datatables.net/v/bs-3.3.6/jqc-1.12.3/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.1/b-colvis-1.2.1/b-html5-1.2.1/b-print-1.2.1/fc-3.2.2/sc-1.4.2/datatables.min.js"></script>
 
-  <script>$(document).ready(function() {
-    var table = $('#assets').DataTable( {
 
-      //scrolling
-      "scrollY": "500px",
-      "scrollX": true,
-      "scrollCollapse": true,
-      "paging": false,
+  <script>
+    //Jquery for datatables
+    $(document).ready(function() {
+      var table = $('#assets').DataTable( {
 
-      //buttons
-      "lengthChange": false,
-      "buttons": [ 'excel', 'pdf', 'colvis' ],
+        //scrolling
+        "scrollY": "500px",
+        "scrollX": true,
+        "scrollCollapse": true,
+        "paging": false,
 
-      //classes
-      "columnDefs": [ {
-        "targets"  : 'no-sort',
-        "orderable": false
-      },
-      {
-        "targets": "default_hidden",
-        "visible": false
-      } ]
+        //buttons
+        "lengthChange": false,
+        "buttons": [ 'excel', 'pdf', 'colvis' ],
+
+        //classes
+        "columnDefs": [ {
+          "targets"  : 'no-sort',
+          "orderable": false
+        },
+        {
+          "targets": "default_hidden",
+          "visible": false
+        } ]
+
+      } );
+
+      table.buttons().container().appendTo('#assets_wrapper .col-sm-6:eq(0)');
 
     } );
 
-    table.buttons().container().appendTo('#assets_wrapper .col-sm-6:eq(0)');
+    //pass data to modal
+    $(document).on("click", ".open-confirmDeleteDialog", function () {
+     var internalID = $(this).data('id');
+     var statement = "/api/delete/asset/" + internalID
+     $(".modal-footer #confirmDeleteButton").prop("href",statement);
+});
 
-  } );</script><!-- JQuery for datatable -->
+  </script>
 
 </head>
 
@@ -110,7 +122,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     <li><a href="/api/return/person/{{ row['person']['name'] }}">View Owner</a></li>
                     <li class="divider"></li>
                     <li class="dropdown-header">Delete</li>
-                    <li><a href="#">Delete Asset</a></li>
+                    <li><a href="#" data-toggle="modal" data-target="#confirmDeleteDialog" data-id="{{ row['asset']['internalID'] }}" class="open-confirmDeleteDialog">Delete Asset</a></li>
                   </ul>
                 </div>
               </td>
@@ -118,6 +130,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             {% endfor %}
           </tbody>
         </table>
+
+        <!-- Deletion Confirm Modal -->
+        <div class="modal fade" id="confirmDeleteDialog" tabindex="-1" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Are you sure?</h4>
+              </div>
+              <div class="modal-body">
+                It's usually good practice to keep assests for recordkeeping, even if they are removed from the network.<br/>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <a id="confirmDeleteButton" class="btn btn-danger" role="button" href="#">I am a bad person; confirm delete</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
       </div> <!-- end col -->
 
 

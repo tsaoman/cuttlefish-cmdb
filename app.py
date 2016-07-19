@@ -21,7 +21,7 @@
 # MODULES #
 #=========#
 
-from flask import Flask, render_template, url_for, request
+from flask import Flask, render_template, url_for, request, redirect
 from py2neo import Graph # v2.0.8
 
 #======#
@@ -61,15 +61,16 @@ def assetAdd():
     statement = "MERGE (asset:Asset {internalID:{internalID}, model:{model}}) MERGE (owner:Person {name:{owner}}) MERGE (owner)-[:OWNS]->(asset)"
     graph.run(statement, internalID=internalID, model=model, owner=owner)
 
-    paragraph = "Hello " + owner + ", here is your " + model
-    return render_template('results.html',paragraph=paragraph)
+    return redirect("/")
 
-@app.route('api/delete/asset/<asset>',methods=['GET'])
-def assetDeleteBy(asset):
+#delete
+@app.route('/api/delete/asset/<internalID>',methods=['GET'])
+def assetDeleteByInternalID(internalID):
 
-    statement = "MATCH (asset:Asset {})"
+    statement = "MATCH (asset:Asset {internalID:{internalID}}) DETACH DELETE asset"
+    data = graph.data(statement, internalID=internalID)
 
-
+    return redirect("/")
 
 
 # GET

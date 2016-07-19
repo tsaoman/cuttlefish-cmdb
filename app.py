@@ -58,8 +58,8 @@ def assetAdd():
     owner = request.form['owner']
     location = request.form['location']
 
-    statement = "MERGE (asset:Asset {model:{model}}) MERGE (owner:Person {name:{owner}}) MERGE (owner)-[:OWNS]->(asset)"
-    graph.run(statement, model=model, owner=owner)
+    statement = "MERGE (asset:Asset {internalID:{internalID}, model:{model}}) MERGE (owner:Person {name:{owner}}) MERGE (owner)-[:OWNS]->(asset)"
+    graph.run(statement, internalID=internalID, model=model, owner=owner)
 
     paragraph = "Hello " + owner + ", here is your " + model
     return render_template('results.html',paragraph=paragraph)

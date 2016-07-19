@@ -42,10 +42,21 @@ def index():
     return render_template("index.html",data=data)
 
 #add new assets / items
-@app.route('/tx', methods=['POST'])
-def tx():
-    owner = request.form['owner']
+@app.route('/api/add/asset', methods=['POST'])
+def assetAdd():
+
+    localaize data
+    internalID = request.form['internalID']
     model = request.form['model']
+    serial = request.form['serial']
+    make = request.form['make']
+    ip = request.form['ip']
+    mac = request.form['mac']
+    date_issued = request.form['date_issued']
+    date_renewel = request.form['date_renewel']
+    condition = request.form['condition']
+    owner = request.form['owner']
+    location = request.form['location']
 
     statement = "MERGE (asset:Asset {model:{model}}) MERGE (owner:Person {name:{owner}}) MERGE (owner)-[:OWNS]->(asset)"
     graph.run(statement, model=model, owner=owner)

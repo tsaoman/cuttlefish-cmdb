@@ -45,18 +45,18 @@ def index():
 @app.route('/api/add/asset', methods=['POST'])
 def assetAdd():
 
-    localaize data
+    #localaize data
     internalID = request.form['internalID']
     model = request.form['model']
-    serial = request.form['serial']
-    make = request.form['make']
-    ip = request.form['ip']
-    mac = request.form['mac']
-    date_issued = request.form['date_issued']
-    date_renewel = request.form['date_renewel']
-    condition = request.form['condition']
+    # serial = request.form['serial']
+    # make = request.form['make']
+    # ip = request.form['ip']
+    # mac = request.form['mac']
+    # date_issued = request.form['date_issued']
+    # date_renewel = request.form['date_renewel']
+    # condition = request.form['condition']
     owner = request.form['owner']
-    location = request.form['location']
+    # location = request.form['location']
 
     statement = "MERGE (asset:Asset {internalID:{internalID}, model:{model}}) MERGE (owner:Person {name:{owner}}) MERGE (owner)-[:OWNS]->(asset)"
     graph.run(statement, internalID=internalID, model=model, owner=owner)
@@ -64,19 +64,28 @@ def assetAdd():
     paragraph = "Hello " + owner + ", here is your " + model
     return render_template('results.html',paragraph=paragraph)
 
+@app.route('api/delete/asset/<asset>',methods=['GET'])
+def assetDeleteBy(asset):
+
+    statement = "MATCH (asset:Asset {})"
+
+
+
+
+# GET
 @app.route('/api/return/person/<person>',methods=['GET'])
 def returnPerson(person):
 
-    statement = "MATCH (a:Person {name:{person}}) RETURN a"
-    data = graph.data(statement,person=person)[0]['a']
+    statement = "MATCH (a:Person {name:{person}}) RETURN a AS person"
+    data = graph.data(statement,person=person)[0]['person']
 
     return str(data)
 
 @app.route('/api/return/asset/<asset>',methods=['GET'])
 def returnAsset(asset):
 
-    statement = "MATCH (a:Asset {model:{asset}}) RETURN a"
-    data = graph.data(statement,asset=asset)[0]['a']
+    statement = "MATCH (a:Asset {model:{asset}}) RETURN a AS asset"
+    data = graph.data(statement,asset=asset)[0]['asset']
 
     return str(data)
 

@@ -1,4 +1,5 @@
 # Cuttlefish CMDB
+#
 # Configuration Management Database leveraging Neo4j
 # Copyright (C) 2016 Brandon Tsao
 #
@@ -48,18 +49,44 @@ def assetAdd():
     #localaize data
     internalID = request.form['internalID']
     model = request.form['model']
-    # serial = request.form['serial']
-    # make = request.form['make']
-    # ip = request.form['ip']
-    # mac = request.form['mac']
-    # date_issued = request.form['date_issued']
-    # date_renewel = request.form['date_renewel']
-    # condition = request.form['condition']
+    make = request.form['make']
+    serial = request.form['serial']
+    ip = request.form['ip']
+    mac = request.form['mac']
+    date_issued = request.form['date_issued']
+    date_renewel = request.form['date_renewel']
+    condition = request.form['condition']
     owner = request.form['owner']
-    # location = request.form['location']
+    location = request.form['location']
 
-    statement = "MERGE (asset:Asset {internalID:{internalID}, model:{model}}) MERGE (owner:Person {name:{owner}}) MERGE (owner)-[:OWNS]->(asset)"
-    graph.run(statement, internalID=internalID, model=model, owner=owner)
+    statement = """MERGE (asset:Asset {
+                    internalID:{internalID},
+                    model:{model},
+                    make:{make},
+                    serial:{serial},
+                    ip:{ip},
+                    mac:{mac},
+                    date_issued:{date_issued},
+                    date_renewel:{date_renewel},
+                    condition:{condition},
+                    location:{location}
+                    })
+
+                MERGE (owner:Person {name:{owner}})
+                MERGE (owner)-[:OWNS]->(asset)"""
+
+    graph.run(statement,
+                internalID=internalID,
+                model=model,
+                make=make,
+                serial=serial,
+                ip=ip,
+                mac=mac,
+                date_issued=date_issued,
+                date_renewel=date_renewel,
+                condition=condition,
+                location=location,
+                owner=owner)
 
     return redirect("/")
 

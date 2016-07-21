@@ -33,9 +33,11 @@ import os
 app = Flask(__name__)
 
 #database connect
-graph = Graph(os.environ.get('GRAPHENEDB_URL', 'http://localhost:7474'))#,
-            # username=os.environ.get('NEO4J_USERNAME','neo4j'),
-            # password=os.environ.get('NEO4J_PASSWORD','origami abase squander costive'))
+
+graph = Graph(os.environ.get('GRAPHENEDB_BOLT_URL', 'http://localhost:7474'),
+            username=os.environ.get('GRAPHENEDB_BOLT_USER'),
+            password=os.environ.get('GRAPHENEDB_BOLT_PASSWORD'),
+            bolt=True)
 
 print(graph.neo4j_version)
 
@@ -46,9 +48,9 @@ print(graph.neo4j_version)
 @app.route('/')
 def index():
 
-    #data = graph.data("MATCH (b:Person)-[:OWNS]->(a:Asset) RETURN a AS asset, b AS person")
+    data = graph.data("MATCH (b:Person)-[:OWNS]->(a:Asset) RETURN a AS asset, b AS person")
 
-    return render_template("index.html")#,data=data)
+    return render_template("index.html",data=data)
 
 #add new assets / items
 @app.route('/api/add/asset', methods=['POST'])

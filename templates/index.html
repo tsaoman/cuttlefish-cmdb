@@ -103,7 +103,37 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               <th class="no-sort"></th>
             </tr>
           </thead>
-
+          <tbody>
+            {% for row in data %}<!-- parse datastring from cypher -->
+            <tr>
+              <td>{{ row['asset']['internalID'] }}</td>
+              <td>{{ row['asset']['model'] }}</td>
+              <td>{{ row['asset']['make'] }}</td>
+              <td>{{ row['asset']['serial'] }}</td>
+              <td>{{ row['asset']['ip'] }}</td>
+              <td>{{ row['asset']['mac'] }}</td>
+              <td>{{ row['asset']['date_issued'] }}</td>
+              <td>{{ row['asset']['date_renewel'] }}
+              <td>{{ row['asset']['condition'] }}</td>
+              <td>{{ row['person']['name'] }}</td>
+              <td>{{ row['asset']['location'] }}</td>
+              <td>
+                <div class="dropdown">
+                  <button class="btn btn-primary btn-xs dropdown-toggle" type="button" data-toggle="dropdown">Inspect
+                  <span class="caret"></span></button>
+                  <ul class="dropdown-menu">
+                    <li class="dropdown-header">View</li>
+                    <li><a href="/api/return/asset/{{ row['asset']['model'] }}">View Asset</a></li>
+                    <li><a href="/api/return/person/{{ row['person']['name'] }}">View Owner</a></li>
+                    <li class="divider"></li>
+                    <li class="dropdown-header">Delete</li>
+                    <li><a href="#" data-toggle="modal" data-target="#confirmDeleteDialog" data-id="{{ row['asset']['internalID'] }}" class="open-confirmDeleteDialog">Delete Asset</a></li>
+                  </ul>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
         </table>
 
         <!-- Deletion Confirm Modal -->

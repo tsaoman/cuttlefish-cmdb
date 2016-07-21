@@ -34,13 +34,9 @@ app = Flask(__name__)
 
 #database connect
 
-graph = Graph(os.environ.get('GRAPHENEDB_BOLT_URL', 'http://localhost:7474'),
-            username=os.environ.get('GRAPHENEDB_BOLT_USER'),
-            password=os.environ.get('GRAPHENEDB_BOLT_PASSWORD'),
-            bolt=True)
+graph = Graph(os.environ.get('GRAPHENEDB_BOLT_URL', 'http://localhost:7474'),bolt=False)
 
 #print(graph.neo4j_version)
-
 #graph = Graph(password="origami abase squander costive")
 
 

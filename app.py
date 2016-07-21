@@ -48,7 +48,7 @@ def index():
 
     #data = graph.data("MATCH (b:Person)-[:OWNS]->(a:Asset) RETURN a AS asset, b AS person")
 
-    return render_template("index.html",data=data)
+    return render_template("index.html")#,data=data)
 
 #add new assets / items
 @app.route('/api/add/asset', methods=['POST'])

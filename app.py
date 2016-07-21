@@ -39,7 +39,7 @@ graph = Graph(os.environ.get('GRAPHENEDB_BOLT_URL', 'http://localhost:7474'),
             password=os.environ.get('GRAPHENEDB_BOLT_PASSWORD'),
             bolt=True)
 
-print(graph.neo4j_version)
+#print(graph.neo4j_version)
 
 #graph = Graph(password="origami abase squander costive")
 

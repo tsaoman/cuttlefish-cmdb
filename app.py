@@ -46,7 +46,7 @@ print(graph.neo4j_version)
 @app.route('/')
 def index():
 
-    data = graph.data("MATCH (b:Person)-[:OWNS]->(a:Asset) RETURN a AS asset, b AS person")
+    #data = graph.data("MATCH (b:Person)-[:OWNS]->(a:Asset) RETURN a AS asset, b AS person")
 
     return render_template("index.html",data=data)
 

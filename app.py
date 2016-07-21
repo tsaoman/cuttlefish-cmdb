@@ -33,9 +33,9 @@ import os
 app = Flask(__name__)
 
 #database connect
-graph = Graph(os.environ.get('GRAPHENEDB_URL', 'http://localhost:7474'),
-            username=os.environ.get('NEO4J_USERNAME','neo4j'),
-            password=os.environ.get('NEO4J_PASSWORD','origami abase squander costive'))
+graph = Graph(os.environ.get('GRAPHENEDB_URL', 'http://localhost:7474'))#,
+            # username=os.environ.get('NEO4J_USERNAME','neo4j'),
+            # password=os.environ.get('NEO4J_PASSWORD','origami abase squander costive'))
 
 print(graph.neo4j_version)
 

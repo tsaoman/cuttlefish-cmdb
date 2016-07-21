@@ -23,7 +23,7 @@
 #=========#
 
 from flask import Flask, render_template, url_for, request, redirect
-from py2neo import Graph # v2.0.8
+from py2neo import Graph
 import os
 
 #======#
@@ -33,7 +33,12 @@ import os
 app = Flask(__name__)
 
 #database connect
-graph = Graph(password="origami abase squander costive")
+
+graph = Graph(os.environ.get('GRAPHENEDB_URL', 'http://localhost:7474'), password='origami abase squander costive')
+print(graph.neo4j_version)
+
+#graph = Graph(password="origami abase squander costive")
+
 
 #index
 @app.route('/')

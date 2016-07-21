@@ -34,10 +34,10 @@ app = Flask(__name__)
 
 #database connect
 
-graph = Graph(os.environ.get('GRAPHENEDB_URL', 'http://localhost:7474'), password='origami abase squander costive')
-print(graph.neo4j_version)
+# graph = Graph(os.environ.get('GRAPHENEDB_URL', 'http://localhost:7474'), password='origami abase squander costive')
+# print(graph.neo4j_version)
 
-#graph = Graph(password="origami abase squander costive")
+graph = Graph(password="origami abase squander costive")
 
 
 #index

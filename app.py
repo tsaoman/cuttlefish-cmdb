@@ -1,6 +1,10 @@
 # Cuttlefish CMDB
-#
 # Configuration Management Database leveraging Neo4j
+
+#=======#
+# LEGAL #
+#=======#
+
 # Copyright (C) 2016 Brandon Tsao
 #
 # This program is free software: you can redistribute it and/or modify
@@ -38,6 +42,15 @@ graph = Graph(os.environ.get('GRAPHENEDB_URL', 'http://localhost:7474'),bolt=Fal
 
 #print(graph.neo4j_version)
 #graph = Graph(password="origami abase squander costive")
+
+#==================#
+# GLOBAL FUNCTIONS
+#==================#
+
+
+#========#
+# ROUTES #
+#========#
 
 
 #index

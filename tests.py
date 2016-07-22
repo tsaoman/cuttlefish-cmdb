@@ -36,7 +36,7 @@ class AppTestCase(unittest.TestCase):
     def setUp(self):
         self.app = app.app.test_client()
 
-        graph = Graph(password="origami abase squander costive")
+        graph = Graph(os.environ.get('GRAPHENEDB_URL', 'http://localhost:7474'),bolt=False)
         graph.run("MATCH (a) DETACH DELETE a") #clears graph
 
     def testPOSTandDBUpdate(self):

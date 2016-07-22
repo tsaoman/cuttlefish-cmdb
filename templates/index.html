@@ -73,6 +73,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       $('#datepicker1').datepicker();
     });
 
+    //menu bleed
+    $('.dropdown-toggle').click(function (){
+            dropDownFixPosition($('button'),$('.dropdown-menu'));
+        });
+
+      function dropDownFixPosition(button,dropdown){
+        var dropDownTop = button.offset().top + button.outerHeight();
+        dropdown.css('top', dropDownTop + "px");
+        dropdown.css('left', button.offset().left + "px");
+      }
+
   </script>
 
 </head>
@@ -84,86 +95,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     <div class="row">
 
-      <div class="col-md-10">
-
-        <h2>Asset Data</h2>
-
-        <table id ="assets" class="table table-hover" cellspacing="0" width="100%">
-          <thead>
-            <tr>
-              <th>Internal ID</th>
-              <th>Model</th>
-              <th class="default_hidden">Make</th>
-              <th>Serial</th>
-              <th>IP</th>
-              <th class="default_hidden">MAC Address (Wifi)</th>
-              <th>Date Issued</th>
-              <th class="default_hidden">Renewel Date</th>
-              <th class="default_hidden">Physical Condition</th>
-              <th class="default_hidden">Owner</th>
-              <th class="default_hidden">Location</th>
-              <th class="no-sort"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in data %}<!-- parse datastring from cypher -->
-            <tr>
-              <td>{{ row['asset']['internalID'] }}</td>
-              <td>{{ row['asset']['model'] }}</td>
-              <td>{{ row['asset']['make'] }}</td>
-              <td>{{ row['asset']['serial'] }}</td>
-              <td>{{ row['asset']['ip'] }}</td>
-              <td>{{ row['asset']['mac'] }}</td>
-              <td>{{ row['asset']['date_issued'] }}</td>
-              <td>{{ row['asset']['date_renewel'] }}
-              <td>{{ row['asset']['condition'] }}</td>
-              <td>{{ row['person']['name'] }}</td>
-              <td>{{ row['asset']['location'] }}</td>
-              <td>
-                <div class="dropdown">
-                  <button class="btn btn-primary btn-xs dropdown-toggle" type="button" data-toggle="dropdown">Inspect
-                  <span class="caret"></span></button>
-                  <ul class="dropdown-menu">
-                    <li class="dropdown-header">View</li>
-                    <li><a href="/api/return/asset/{{ row['asset']['model'] }}">View Asset</a></li>
-                    <li><a href="/api/return/person/{{ row['person']['name'] }}">View Owner</a></li>
-                    <li class="divider"></li>
-                    <li class="dropdown-header">Delete</li>
-                    <li><a href="#" data-toggle="modal" data-target="#confirmDeleteDialog" data-id="{{ row['asset']['internalID'] }}" class="open-confirmDeleteDialog">Delete Asset</a></li>
-                  </ul>
-                </div>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-
-        <!-- Deletion Confirm Modal -->
-        <div class="modal fade" id="confirmDeleteDialog" tabindex="-1" role="dialog">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-                <h4 class="modal-title">Are you sure?</h4>
-              </div>
-              <div class="modal-body">
-                It's usually good practice to keep assests for recordkeeping, even if they are removed from the network.<br/>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <a id="confirmDeleteButton" class="btn btn-danger" role="button" href="#">I am a bad person; confirm delete</a>
-              </div>
-            </div>
-          </div>
-        </div><!-- end modal -->
-
-
-
-      </div> <!-- end col -->
-
-
       <div class="col-md-2">
         <h2>Actions</h2>
 
@@ -171,6 +102,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <button type="button" class="btn btn-primary">Scan Network</button>
           <button type="button" class="btn btn-primary">Upload File</button>
           <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#assetAddModal">Manual Add</button>
+          <button type="button" class="btn btn-primary">Settings</button>
+          <button type="button" class="btn btn-primary">About</button>
         </div>
 
         <!-- Add Asset Modal -->
@@ -269,6 +202,83 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                 <input id="assetAddSubmit" form="assetAddForm" class="btn btn-primary" type="submit" value="Submit">
+              </div>
+            </div>
+          </div>
+        </div><!-- end modal -->
+
+      </div> <!-- end col -->
+
+
+      <div class="col-md-10">
+
+        <h2>Asset Data</h2>
+
+        <table id ="assets" class="table table-hover" cellspacing="0" width="100%">
+          <thead>
+            <tr>
+              <th>Internal ID</th>
+              <th>Model</th>
+              <th class="default_hidden">Make</th>
+              <th>Serial</th>
+              <th>IP</th>
+              <th class="default_hidden">MAC Address (Wifi)</th>
+              <th>Date Issued</th>
+              <th class="default_hidden">Renewel Date</th>
+              <th class="default_hidden">Physical Condition</th>
+              <th class="default_hidden">Owner</th>
+              <th class="default_hidden">Location</th>
+              <th class="no-sort">Inspect</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in data %}<!-- parse datastring from cypher -->
+            <tr>
+              <td>{{ row['asset']['internalID'] }}</td>
+              <td>{{ row['asset']['model'] }}</td>
+              <td>{{ row['asset']['make'] }}</td>
+              <td>{{ row['asset']['serial'] }}</td>
+              <td>{{ row['asset']['ip'] }}</td>
+              <td>{{ row['asset']['mac'] }}</td>
+              <td>{{ row['asset']['date_issued'] }}</td>
+              <td>{{ row['asset']['date_renewel'] }}
+              <td>{{ row['asset']['condition'] }}</td>
+              <td>{{ row['person']['name'] }}</td>
+              <td>{{ row['asset']['location'] }}</td>
+              <td>
+                <div class="dropdown" style="position:fixed">
+                  <button class="btn btn-primary btn-xs dropdown-toggle" type="button" data-toggle="dropdown">Inspect<span class="caret"></span></button>
+                  <ul class="dropdown-menu">
+                    <li class="dropdown-header">View</li>
+                    <li><a href="/api/return/asset/{{ row['asset']['model'] }}">View Asset</a></li>
+                    <li><a href="/api/return/person/{{ row['person']['name'] }}">View Owner</a></li>
+                    <li class="divider"></li>
+                    <li class="dropdown-header">Delete</li>
+                    <li><a href="#" data-toggle="modal" data-target="#confirmDeleteDialog" data-id="{{ row['asset']['internalID'] }}" class="open-confirmDeleteDialog">Delete Asset</a></li>
+                  </ul>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <!-- Deletion Confirm Modal -->
+        <div class="modal fade" id="confirmDeleteDialog" tabindex="-1" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Are you sure?</h4>
+              </div>
+              <div class="modal-body">
+                It's usually good practice to keep assests for recordkeeping, even if they are removed from the network.<br/>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <a id="confirmDeleteButton" class="btn btn-danger" role="button" href="#">I am a bad person; confirm delete</a>
               </div>
             </div>
           </div>

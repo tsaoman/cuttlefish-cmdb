@@ -57,7 +57,7 @@ graph = Graph(os.environ.get('GRAPHENEDB_URL', 'http://localhost:7474'),bolt=Fal
 @app.route('/')
 def index():
 
-    data = graph.data("MATCH (b:Person)-[:OWNS]->(a:Asset) RETURN a AS asset, b AS person")
+    data = graph.data("MATCH (b:Person)-[:OWNS]->(a:Asset) RETURN a AS asset, b AS person, id(a) AS uid, id(b) as pid")
 
     return render_template("index.html",data=data)
 
@@ -66,7 +66,7 @@ def index():
 def assetAdd():
 
     #localaize data
-    internalID = request.form['internalID']
+    uid = request.form['uid']
     model = request.form['model']
     make = request.form['make']
     serial = request.form['serial']
@@ -79,7 +79,7 @@ def assetAdd():
     location = request.form['location']
 
     statement = """MERGE (asset:Asset {
-                    internalID:{internalID},
+                    uid:{uid},
                     model:{model},
                     make:{make},
                     serial:{serial},
@@ -95,7 +95,7 @@ def assetAdd():
                 MERGE (owner)-[:OWNS]->(asset)"""
 
     graph.run(statement,
-                internalID=internalID,
+                uid=uid,
                 model=model,
                 make=make,
                 serial=serial,
@@ -130,7 +130,7 @@ def returnAsset(asset):
 def assetUpdate():
 
     #locallize data
-    uid = request.form['internalID']
+    uid = request.form['uid']
     model = request.form['model']
     make = request.form['make']
     serial = request.form['serial']
@@ -142,7 +142,7 @@ def assetUpdate():
     owner = request.form['owner']
     location = request.form['location']
 
-    statement = """MATCH (asset:Asset {internalID:{uid}})
+    statement = """MATCH (asset:Asset {uid:{uid}})
                 SET asset.model={model}
                 SET asset.make={make}
                 SET asset.serial={serial}
@@ -151,7 +151,8 @@ def assetUpdate():
                 SET asset.date_issued={date_issued}
                 SET asset.date_renewel={date_renewel}
                 SET asset.condition={condition}
-                SET asset.location={location}"""
+                SET asset.location={location}
+                """
 
     graph.run(statement,
                 uid=uid,
@@ -168,14 +169,13 @@ def assetUpdate():
     return redirect("/")
 
 #delete
-@app.route('/api/delete/asset/<internalID>',methods=['GET'])
-def assetDeleteByInternalID(internalID):
+@app.route('/api/delete/asset/<int:uid>',methods=['GET'])
+def assetDeleteByUID(uid):
 
-    statement = "MATCH (asset:Asset {internalID:{internalID}}) DETACH DELETE asset"
-    data = graph.data(statement, internalID=internalID)
+    statement = "MATCH (asset:Asset) WHERE id(asset)={uid} DETACH DELETE asset"
+    graph.run(statement, uid=uid)
 
     return redirect("/")
-
 
 
 #=====#

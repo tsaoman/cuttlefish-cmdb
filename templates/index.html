@@ -61,12 +61,57 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     } );
 
-    //pass data to modal
+    //pass data to delete modal
     $(document).on("click", ".open-confirmDeleteDialog", function () {
      var internalID = $(this).data('id');
      var statement = "/api/delete/asset/" + internalID
      $(".modal-footer #confirmDeleteButton").prop("href",statement);
     });
+
+
+    //prepare asset add form
+    $(document).on("click", ".open-assetAddModal", function() {
+
+      $(".modal-body #AssetAddForm").prop("action","{{ url_for('assetAdd') }}"); //change API target
+      $(".modal-title").text("Add Asset - Manual"); //change title
+
+      $('#AssetFormInternalID').val('');
+      $('#AssetAddForm').find('input').val('');
+
+    });
+
+
+    //pass data to edit modal
+    $(document).on("click", ".open-assetUpdateModal", function () {
+
+      $(".modal-body #AssetAddForm").prop("action","{{ url_for('assetUpdate') }}"); //change API target
+      $(".modal-title").text("Edit Asset"); //change title
+
+     var internalID = $(this).data('internalid');
+     var model = $(this).data('model');
+     var make = $(this).data('make');
+     var serial = $(this).data('serial');
+     var ip = $(this).data('ip');
+     var mac = $(this).data('mac');
+     var date_issued = $(this).data('date-issued');
+     var date_renewel = $(this).data('date-renewel');
+     var condition = $(this).data('condition');
+     var owner = $(this).data('owner');
+     var location = $(this).data('location');
+
+     $(".modal-body #AssetFormInternalID").val(internalID);
+     $(".modal-body #AssetFormModel").val(model);
+     $(".modal-body #AssetFormMake").val(make);
+     $(".modal-body #AssetFormSerial").val(serial);
+     $(".modal-body #AssetFormIp").val(ip);
+     $(".modal-body #AssetFormMac").val(mac);
+     $(".modal-body #AssetFormDateIssued").val(date_issued);
+     $(".modal-body #AssetFormDateRenewel").val(date_renewel);
+     $(".modal-body #AssetFormCondition").val(condition);
+     $(".modal-body #AssetFormOwner").val(owner);
+     $(".modal-body #AssetFormLocation").val(location);
+
+   });
 
     //date picker
     $(function () {
@@ -74,15 +119,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     });
 
     //menu bleed
-    $('.dropdown-toggle').click(function (){
-            dropDownFixPosition($('button'),$('.dropdown-menu'));
-        });
-
-      function dropDownFixPosition(button,dropdown){
-        var dropDownTop = button.offset().top + button.outerHeight();
-        dropdown.css('top', dropDownTop + "px");
-        dropdown.css('left', button.offset().left + "px");
-      }
+    // $('.dropdown-toggle').click(function (){
+    //         dropDownFixPosition($('button'),$('.dropdown-menu'));
+    //     });
+    //
+    //   function dropDownFixPosition(button,dropdown){
+    //     var dropDownTop = button.offset().top + button.outerHeight();
+    //     dropdown.css('top', dropDownTop + "px");
+    //     dropdown.css('left', button.offset().left + "px");
+    //   }
 
   </script>
 
@@ -101,7 +146,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <div class="btn-group-vertical">
           <button type="button" class="btn btn-primary">Scan Network</button>
           <button type="button" class="btn btn-primary">Upload File</button>
-          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#assetAddModal">Manual Add</button>
+          <button type="button" class="btn btn-primary open-assetAddModal" data-toggle="modal" data-target="#assetAddModal">Manual Add</button>
           <button type="button" class="btn btn-primary">Settings</button>
           <button type="button" class="btn btn-primary">About</button>
         </div>
@@ -114,7 +159,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
-                <h4 class="modal-title">Add Asset - Manual</h4>
+                <h4 class="modal-title" id="modalHeader">Add Asset - Manual</h4>
               </div>
               <div class="modal-body">
                 <form id="assetAddForm" method="POST" action="{{ url_for('assetAdd') }}">
@@ -122,77 +167,77 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   <div class="form-group row">
                     <label for="internalID" class="col-sm-4 form-control-label">Internal ID:</label>
                     <div class="col-sm-8">
-                      <input type="text" class="form-control" name="internalID" placeholder="Internal ID">
+                      <input type="text" class="form-control" name="internalID" id="AssetFormInternalID" placeholder="Internal ID">
                     </div>
                   </div>
 
                   <div class="form-group row">
                     <label for="model" class="col-sm-4 form-control-label">Model:</label>
                     <div class="col-sm-8">
-                      <input type="text" class="form-control" name="model" placeholder="Model">
+                      <input type="text" class="form-control" name="model" id="AssetFormModel" placeholder="Model">
                     </div>
                   </div>
 
                   <div class="form-group row">
                     <label for="make" class="col-sm-4 form-control-label">Make:</label>
                     <div class="col-sm-8">
-                      <input type="text" class="form-control" name="make" placeholder="Make">
+                      <input type="text" class="form-control" name="make" id="AssetFormMake" placeholder="Make">
                     </div>
                   </div>
 
                   <div class="form-group row">
                     <label for="serial" class="col-sm-4 form-control-label">Serial #:</label>
                     <div class="col-sm-8">
-                      <input type="text" class="form-control" name="serial" placeholder="Serial">
+                      <input type="text" class="form-control" name="serial" id="AssetFormSerial" placeholder="Serial">
                     </div>
                   </div>
 
                   <div class="form-group row">
                     <label for="ip" class="col-sm-4 form-control-label">IP:</label>
                     <div class="col-sm-8">
-                      <input type="text" class="form-control" name="ip" placeholder="IP">
+                      <input type="text" class="form-control" name="ip" id="AssetFormIp" placeholder="IP">
                     </div>
                   </div>
 
                   <div class="form-group row">
                     <label for="mac" class="col-sm-4 form-control-label">MAC Address (WiFi):</label>
                     <div class="col-sm-8">
-                      <input type="text" class="form-control" name="mac" placeholder="MAC Address (Wifi)">
+                      <input type="text" class="form-control" name="mac" id="AssetFormMac" placeholder="MAC Address (Wifi)">
                     </div>
                   </div>
 
                   <div class="form-group row">
                     <label for="date_issued" class="col-sm-4 form-control-label">Date Issued:</label>
                     <div class="col-sm-8">
-                      <input type='text' class="form-control" id="datepicker1" name="date_issued" placeholder="Date Issued">
+                      <input type='text' class="form-control" id="AssetFormDateIssued" name="date_issued" placeholder="Date Issued">
                     </div>
                   </div>
 
                   <div class="form-group row">
                     <label for="date_renewel" class="col-sm-4 form-control-label">Date of Renewel:</label>
                     <div class="col-sm-8">
-                      <input type="text" class="form-control" name="date_renewel" placeholder="Date of Renewel">
+                      <input type="text" class="form-control" name="date_renewel" id="AssetFormDateRenewel" placeholder="Date of Renewel">
                     </div>
                   </div>
 
                   <div class="form-group row">
                     <label for="condition" class="col-sm-4 form-control-label">Physical Condition:</label>
                     <div class="col-sm-8">
-                      <input type="text" class="form-control" name="condition" placeholder="Physical Condition">
+                      <input type="text" class="form-control" name="condition" id="AssetFormCondition" placeholder="Physical Condition">
                     </div>
                   </div>
 
                   <div class="form-group row">
                     <label for="owner" class="col-sm-4 form-control-label">Owner:</label>
                     <div class="col-sm-8">
-                      <input type="text" class="form-control" name="owner" placeholder="Owner">
+                      <input type="text" class="form-control" name="owner" id="AssetFormOwner" placeholder="Owner">
                     </div>
                   </div>
 
                   <div class="form-group row">
                     <label for="location" class="col-sm-4 form-control-label">Location:</label>
                     <div class="col-sm-8">
-                      <input type="text" class="form-control" name="location" placeholder="Location">
+                      <input type="text" class="form-control" name="location" id="AssetFormLocation" placeholder="Location">
                     </div>
                   </div>
 
@@ -246,12 +291,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               <td>{{ row['person']['name'] }}</td>
               <td>{{ row['asset']['location'] }}</td>
               <td>
-                <div class="dropdown" style="position:fixed">
+                <div class="dropdown">
                   <button class="btn btn-primary btn-xs dropdown-toggle" type="button" data-toggle="dropdown">Inspect<span class="caret"></span></button>
                   <ul class="dropdown-menu">
                     <li class="dropdown-header">View</li>
                     <li><a href="/api/return/asset/{{ row['asset']['model'] }}">View Asset</a></li>
                     <li><a href="/api/return/person/{{ row['person']['name'] }}">View Owner</a></li>
+
+                    <li class="divider"></li>
+                    <li class="dropdown-header">Edit</li>
+                    <li><a href="#" data-toggle="modal" data-target="#assetAddModal" class="open-assetUpdateModal"
+                      data-internalid="{{ row['asset']['internalID'] }}"
+                      data-model="{{ row['asset']['model'] }}"
+                      data-make="{{ row['asset']['make'] }}"
+                      data-serial="{{ row['asset']['serial'] }}"
+                      data-ip="{{ row['asset']['ip'] }}"
+                      data-mac="{{ row['asset']['mac'] }}"
+                      data-date-issued="{{ row['asset']['date_issued'] }}"
+                      data-date-renewel="{{ row['asset']['date_renewel'] }}"
+                      data-condition="{{ row['asset']['condition'] }}"
+                      data-owner="{{ row['asset']['owner'] }}"
+                      data-location="{{ row['asset']['location'] }}">
+                      Edit Asset
+                    </a></li>
+
+
                     <li class="divider"></li>
                     <li class="dropdown-header">Delete</li>
                     <li><a href="#" data-toggle="modal" data-target="#confirmDeleteDialog" data-id="{{ row['asset']['internalID'] }}" class="open-confirmDeleteDialog">Delete Asset</a></li>
@@ -262,6 +326,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             {% endfor %}
           </tbody>
         </table>
+
+        <!-- Edit Asset Modal -->
 
         <!-- Deletion Confirm Modal -->
         <div class="modal fade" id="confirmDeleteDialog" tabindex="-1" role="dialog">

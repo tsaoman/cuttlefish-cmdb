@@ -109,15 +109,6 @@ def assetAdd():
 
     return redirect("/")
 
-#delete
-@app.route('/api/delete/asset/<internalID>',methods=['GET'])
-def assetDeleteByInternalID(internalID):
-
-    statement = "MATCH (asset:Asset {internalID:{internalID}}) DETACH DELETE asset"
-    data = graph.data(statement, internalID=internalID)
-
-    return redirect("/")
-
 # GET
 @app.route('/api/return/person/<person>',methods=['GET'])
 def returnPerson(person):
@@ -134,6 +125,58 @@ def returnAsset(asset):
     data = graph.data(statement,asset=asset)[0]['asset']
 
     return str(data)
+
+@app.route('/api/update/asset/',methods=['POST'])
+def assetUpdate():
+
+    #locallize data
+    uid = request.form['internalID']
+    model = request.form['model']
+    make = request.form['make']
+    serial = request.form['serial']
+    ip = request.form['ip']
+    mac = request.form['mac']
+    date_issued = request.form['date_issued']
+    date_renewel = request.form['date_renewel']
+    condition = request.form['condition']
+    owner = request.form['owner']
+    location = request.form['location']
+
+    statement = """MATCH (asset:Asset {internalID:{uid}})
+                SET asset.model={model}
+                SET asset.make={make}
+                SET asset.serial={serial}
+                SET asset.ip={ip}
+                SET asset.mac={mac}
+                SET asset.date_issued={date_issued}
+                SET asset.date_renewel={date_renewel}
+                SET asset.condition={condition}
+                SET asset.location={location}"""
+
+    graph.run(statement,
+                uid=uid,
+                model=model,
+                make=make,
+                serial=serial,
+                ip=ip,
+                mac=mac,
+                date_issued=date_issued,
+                date_renewel=date_renewel,
+                condition=condition,
+                location=location)
+
+    return redirect("/")
+
+#delete
+@app.route('/api/delete/asset/<internalID>',methods=['GET'])
+def assetDeleteByInternalID(internalID):
+
+    statement = "MATCH (asset:Asset {internalID:{internalID}}) DETACH DELETE asset"
+    data = graph.data(statement, internalID=internalID)
+
+    return redirect("/")
+
+
 
 #=====#
 # RUN #

@@ -66,7 +66,6 @@ def index():
 def assetAdd():
 
     #localaize data
-    uid = request.form['uid']
     model = request.form['model']
     make = request.form['make']
     serial = request.form['serial']
@@ -79,7 +78,6 @@ def assetAdd():
     location = request.form['location']
 
     statement = """MERGE (asset:Asset {
-                    uid:{uid},
                     model:{model},
                     make:{make},
                     serial:{serial},
@@ -95,7 +93,6 @@ def assetAdd():
                 MERGE (owner)-[:OWNS]->(asset)"""
 
     graph.run(statement,
-                uid=uid,
                 model=model,
                 make=make,
                 serial=serial,
@@ -130,7 +127,7 @@ def returnAsset(asset):
 def assetUpdate():
 
     #locallize data
-    uid = request.form['uid']
+    uid = int(request.form['uid'])
     model = request.form['model']
     make = request.form['make']
     serial = request.form['serial']
@@ -142,7 +139,9 @@ def assetUpdate():
     owner = request.form['owner']
     location = request.form['location']
 
-    statement = """MATCH (asset:Asset {uid:{uid}})
+    statement = """OPTIONAL MATCH (asset:Asset)-[r]-(person:Person)
+                WHERE id(asset)={uid}
+                delete r
                 SET asset.model={model}
                 SET asset.make={make}
                 SET asset.serial={serial}
@@ -152,6 +151,9 @@ def assetUpdate():
                 SET asset.date_renewel={date_renewel}
                 SET asset.condition={condition}
                 SET asset.location={location}
+                MERGE (person:Person {name:{owner}})
+                MERGE (person)-[:OWNS]->(asset)
+
                 """
 
     graph.run(statement,
@@ -165,6 +167,7 @@ def assetUpdate():
                 date_renewel=date_renewel,
                 condition=condition,
                 location=location)
+
 
     return redirect("/")
 

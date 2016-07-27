@@ -96,8 +96,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
      var date_issued = $(this).data('date-issued');
      var date_renewel = $(this).data('date-renewel');
      var condition = $(this).data('condition');
-     var owner = $(this).data('owner');
      var location = $(this).data('location');
+
+     var owner = $(this).data('owner');
+     var pid = $(this).data('pid')
 
      $(".modal-body #AssetFormUID").val(uid);
      $(".modal-body #AssetFormModel").val(model);
@@ -310,7 +312,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                       data-date-issued="{{ row['asset']['date_issued'] }}"
                       data-date-renewel="{{ row['asset']['date_renewel'] }}"
                       data-condition="{{ row['asset']['condition'] }}"
-                      data-owner="{{ row['asset']['owner'] }}"
+                      data-owner="{{ row['person']['name'] }}"
                       data-location="{{ row['asset']['location'] }}">
                       Edit Asset
                     </a></li>

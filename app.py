@@ -21,27 +21,42 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
 #=========#
 # MODULES #
 #=========#
 
-from flask import Flask, render_template, url_for, request, redirect
+from flask import Flask, render_template, url_for, request, redirect, session, jsonify, abort
+from flask_basicauth import BasicAuth
+from oauth2client import client
 from py2neo import Graph
-import os
+
+import os, sys, httplib2, json, apiclient
+
+#=============#
+# CONFIG VARS #
+#=============#
+
+AUTH_REQUIRED = 2
+RESTRICTED_DOMAIN = 'example.com'
 
 #======#
 # MAIN #
 #======#
 
 app = Flask(__name__)
+app.debug = False
+app.secret_key = str(os.urandom(32))
 
 #database connect
-
 graph = Graph(os.environ.get('GRAPHENEDB_URL', 'http://localhost:7474'),bolt=False)
 
-#print(graph.neo4j_version)
-#graph = Graph(password="origami abase squander costive")
+#auth
+
+if AUTH_REQUIRED == 1:
+    app.config['BASIC_AUTH_USERNAME'] = 'user'
+    app.config['BASIC_AUTH_PASSWORD'] = 'password'
+    app.config['BASIC_AUTH_FORCE'] = True
+    basic_auth = BasicAuth(app)
 
 #==================#
 # GLOBAL FUNCTIONS
@@ -52,14 +67,71 @@ graph = Graph(os.environ.get('GRAPHENEDB_URL', 'http://localhost:7474'),bolt=Fal
 # ROUTES #
 #========#
 
-
 #index
 @app.route('/')
 def index():
 
+    if 'username' in session:
+        username = session['username']
+    else:
+        return redirect(url_for('login'))
+
     data = graph.data("MATCH (b:Person)-[:OWNS]->(a:Asset) RETURN a AS asset, b AS person, id(a) AS uid, id(b) as pid")
 
-    return render_template("index.html",data=data)
+    return render_template("index.html",data=data,username=username)
+
+#auth routes
+
+@app.route('/login')
+def login():
+    if 'credentials' not in session:
+        return redirect(url_for('oauth2callback'))
+
+    credentials = client.OAuth2Credentials.from_json(session['creden  tials'])
+    if credentials.access_token_expired:
+        return redirect(url_for('oauth2callback'))
+
+    else:
+        http_auth = credentials.authorize(httplib2.Http())
+
+        plus_service = apiclient.discovery.build('plus','v1',http=http_auth)
+        profile = plus_service.people().get(userId='me').execute()
+
+        if 'domain' in profile and profile['domain'] == RESTRICTED_DOMAIN:
+            session['username'] = profile['displayName']
+            session['email'] = profile['emails'][0]['value']
+
+            return redirect(url_for('index'))
+
+        else:
+            return abort(401)
+
+@app.route('/oauth2callback',methods=['GET','POST'])
+def oauth2callback():
+
+    flow = client.flow_from_clientsecrets(
+        'shadow/client_secrets.json',
+        scope = 'https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.profile.emails.read',
+        redirect_uri = 'http://localhost:5000/oauth2callback'
+    )
+
+    if 'code' not in request.args:
+        auth_uri = flow.step1_get_authorize_url()
+        return redirect(auth_uri)
+
+    else:
+        auth_code = request.args.get('code')
+        credentials = flow.step2_exchange(auth_code)
+        session['credentials'] = credentials.to_json()
+        return redirect(url_for('login'))
+
+@app.route('/logout')
+def logout():
+    session.pop('username',None)
+    session.pop('email',None)
+    return redirect(url_for('index'))
+
+#asset CRUD
 
 #add new assets / items
 @app.route('/api/add/asset', methods=['POST'])
@@ -179,6 +251,11 @@ def assetDeleteByUID(uid):
     graph.run(statement, uid=uid)
 
     return redirect("/")
+
+#auth
+@app.route('/auth/oauth2callback')
+def authCallback():
+    pass
 
 
 #=====#

@@ -115,21 +115,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
    });
 
-    //date picker
-    $(function () {
-      $('#datepicker1').datepicker();
-    });
 
-    //menu bleed
-    // $('.dropdown-toggle').click(function (){
-    //         dropDownFixPosition($('button'),$('.dropdown-menu'));
-    //     });
-    //
-    //   function dropDownFixPosition(button,dropdown){
-    //     var dropDownTop = button.offset().top + button.outerHeight();
-    //     dropdown.css('top', dropDownTop + "px");
-    //     dropdown.css('left', button.offset().left + "px");
-    //   }
 
   </script>
 
@@ -143,6 +129,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <div class="row">
 
       <div class="col-md-2">
+
+        <p>You are logged in as <b>{{ username }}</b></p>
+
         <h2>Actions</h2>
 
         <div class="btn-group-vertical">
@@ -281,7 +270,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <tbody>
             {% for row in data %}<!-- parse datastring from cypher -->
             <tr>
-              <td>{{ row['uid'] }}</td>
+              <td id="uid">{{ row['uid'] }}</td>
               <td>{{ row['asset']['model'] }}</td>
               <td>{{ row['asset']['make'] }}</td>
               <td>{{ row['asset']['serial'] }}</td>
@@ -294,14 +283,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               <td>{{ row['asset']['location'] }}</td>
               <td>
                 <div class="dropdown">
-                  <button class="btn btn-primary btn-xs dropdown-toggle" type="button" data-toggle="dropdown">Inspect<span class="caret"></span></button>
+                  <button id="dropdownButton" class="btn btn-primary btn-xs dropdown-toggle" type="button" data-toggle= "dropdown">Inspect<span class="caret"></span></button>
                   <ul class="dropdown-menu">
-                    <li class="dropdown-header">View</li>
                     <li><a href="/api/return/asset/{{ row['asset']['model'] }}">View Asset</a></li>
                     <li><a href="/api/return/person/{{ row['person']['name'] }}">View Owner</a></li>
 
                     <li class="divider"></li>
-                    <li class="dropdown-header">Edit</li>
                     <li><a href="#" data-toggle="modal" data-target="#assetAddModal" class="open-assetUpdateModal"
                       data-uid="{{ row['uid'] }}"
                       data-model="{{ row['asset']['model'] }}"
@@ -319,7 +306,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
                     <li class="divider"></li>
-                    <li class="dropdown-header">Delete</li>
                     <li><a href="#" data-toggle="modal" data-target="#confirmDeleteDialog" data-uid="{{ row['uid'] }}" class="open-confirmDeleteDialog">Delete Asset</a></li>
                   </ul>
                 </div>

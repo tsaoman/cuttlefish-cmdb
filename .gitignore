@@ -4,6 +4,9 @@
 #OS X
 .DS_Store
 
+#shadow
+shadow/
+
 #virtualenv
 bin/
 

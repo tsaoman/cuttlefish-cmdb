@@ -87,7 +87,7 @@ def login():
     if 'credentials' not in session:
         return redirect(url_for('oauth2callback'))
 
-    credentials = client.OAuth2Credentials.from_json(session['creden  tials'])
+    credentials = client.OAuth2Credentials.from_json(session['credentials'])
     if credentials.access_token_expired:
         return redirect(url_for('oauth2callback'))
 
@@ -256,7 +256,6 @@ def assetDeleteByUID(uid):
 @app.route('/auth/oauth2callback')
 def authCallback():
     pass
-
 
 #=====#
 # RUN #

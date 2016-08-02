@@ -240,7 +240,6 @@ def assetUpdate():
                 condition=condition,
                 location=location)
 
-
     return redirect("/")
 
 #delete

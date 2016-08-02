@@ -37,7 +37,7 @@ import os, sys, httplib2, json, apiclient
 #=============#
 
 AUTH_REQUIRED = 2
-RESTRICTED_DOMAIN = 'example.com'
+RESTRICTED_DOMAIN = 'neotechnology.com'
 
 #======#
 # MAIN #
@@ -194,6 +194,8 @@ def returnAsset(asset):
     data = graph.data(statement,asset=asset)[0]['asset']
 
     return str(data)
+
+#UPDATE
 
 @app.route('/api/update/asset/',methods=['POST'])
 def assetUpdate():

@@ -27,6 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   <!-- Boostrap / Datatables CDN -->
   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs-3.3.6/jqc-1.12.3/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.1/b-colvis-1.2.1/b-html5-1.2.1/b-print-1.2.1/fc-3.2.2/sc-1.4.2/datatables.min.css"/>
+  <link rel="stylesheet" type="text/css" href="/static/css/ui.css"/>
   <script type="text/javascript" src="https://cdn.datatables.net/v/bs-3.3.6/jqc-1.12.3/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.1/b-colvis-1.2.1/b-html5-1.2.1/b-print-1.2.1/fc-3.2.2/sc-1.4.2/datatables.min.js"></script>
   <script type="text/javascript" src="/static/js/ui.js"></script>
 
@@ -53,115 +54,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <button type="button" class="btn btn-primary">About</button>
         </div>
 
-        <!-- Add Asset Modal -->
-        <div class="modal fade" id="assetAddModal" tabindex="-1" role="dialog">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-                <h4 class="modal-title" id="modalHeader">Add Asset - Manual</h4>
-              </div>
-              <div class="modal-body">
-                <form id="assetAddForm" method="POST" action="{{ url_for('assetAdd') }}">
-
-                  <div class="form-group row">
-                    <label for="uid" class="col-sm-4 form-control-label">UID</label>
-                    <div class="col-sm-8">
-                      <input type="text" class="form-control" name="uid" id="AssetFormUID" placeholder="(automatically populated)" disabled>
-                    </div>
-                  </div>
-
-                  <div class="form-group row">
-                    <label for="model" class="col-sm-4 form-control-label">Model:</label>
-                    <div class="col-sm-8">
-                      <input type="text" class="form-control" name="model" id="AssetFormModel" placeholder="Model">
-                    </div>
-                  </div>
-
-                  <div class="form-group row">
-                    <label for="make" class="col-sm-4 form-control-label">Make:</label>
-                    <div class="col-sm-8">
-                      <input type="text" class="form-control" name="make" id="AssetFormMake" placeholder="Make">
-                    </div>
-                  </div>
-
-                  <div class="form-group row">
-                    <label for="serial" class="col-sm-4 form-control-label">Serial #:</label>
-                    <div class="col-sm-8">
-                      <input type="text" class="form-control" name="serial" id="AssetFormSerial" placeholder="Serial">
-                    </div>
-                  </div>
-
-                  <div class="form-group row">
-                    <label for="ip" class="col-sm-4 form-control-label">IP:</label>
-                    <div class="col-sm-8">
-                      <input type="text" class="form-control" name="ip" id="AssetFormIp" placeholder="IP">
-                    </div>
-                  </div>
-
-                  <div class="form-group row">
-                    <label for="mac" class="col-sm-4 form-control-label">MAC Address (WiFi):</label>
-                    <div class="col-sm-8">
-                      <input type="text" class="form-control" name="mac" id="AssetFormMac" placeholder="MAC Address (Wifi)">
-                    </div>
-                  </div>
-
-                  <div class="form-group row">
-                    <label for="date_issued" class="col-sm-4 form-control-label">Date Issued:</label>
-                    <div class="col-sm-8">
-                      <input type='text' class="form-control" id="AssetFormDateIssued" name="date_issued" placeholder="Date Issued">
-                    </div>
-                  </div>
-
-                  <div class="form-group row">
-                    <label for="date_renewel" class="col-sm-4 form-control-label">Date of Renewel:</label>
-                    <div class="col-sm-8">
-                      <input type="text" class="form-control" name="date_renewel" id="AssetFormDateRenewel" placeholder="Date of Renewel">
-                    </div>
-                  </div>
-
-                  <div class="form-group row">
-                    <label for="condition" class="col-sm-4 form-control-label">Physical Condition:</label>
-                    <div class="col-sm-8">
-                      <input type="text" class="form-control" name="condition" id="AssetFormCondition" placeholder="Physical Condition">
-                    </div>
-                  </div>
-
-                  <div class="form-group row">
-                    <label for="owner" class="col-sm-4 form-control-label">Owner:</label>
-                    <div class="col-sm-8">
-                      <input type="text" class="form-control" name="owner" id="AssetFormOwner" placeholder="Owner">
-                    </div>
-                  </div>
-
-                  <div class="form-group row">
-                    <label for="location" class="col-sm-4 form-control-label">Location:</label>
-                    <div class="col-sm-8">
-                      <input type="text" class="form-control" name="location" id="AssetFormLocation" placeholder="Location">
-                    </div>
-                  </div>
-
-                </form>
-
-              </div><!-- end modal body -->
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <input id="assetAddSubmit" form="assetAddForm" class="btn btn-primary" type="submit" value="Submit">
-              </div>
-            </div>
-          </div>
-        </div><!-- end modal -->
-
       </div> <!-- end col -->
-
 
       <div class="col-md-10">
 
         <h2>Asset Data</h2>
 
-        <table id ="assets" class="table table-hover" cellspacing="0" width="100%">
+        <table id="assets" class="table table-hover" cellspacing="0" width="100%">
           <thead>
             <tr>
               <th>UID</th>
@@ -175,7 +74,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               <th class="default_hidden">Physical Condition</th>
               <th>Owner</th>
               <th class="default_hidden">Location</th>
-              <th class="no-sort">Inspect</th>
+
             </tr>
           </thead>
           <tbody>
@@ -192,67 +91,242 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               <td>{{ row['asset']['condition'] }}</td>
               <td>{{ row['person']['name'] }}</td>
               <td>{{ row['asset']['location'] }}</td>
-              <td>
-                <div class="dropdown">
-                  <button id="dropdownButton" class="btn btn-primary btn-xs dropdown-toggle" type="button" data-toggle= "dropdown">Inspect<span class="caret"></span></button>
-                  <ul class="dropdown-menu">
-                    <li><a href="/api/return/asset/{{ row['asset']['model'] }}">View Asset</a></li>
-                    <li><a href="/api/return/person/{{ row['person']['name'] }}">View Owner</a></li>
-
-                    <li class="divider"></li>
-                    <li><a href="#" data-toggle="modal" data-target="#assetAddModal" class="open-assetUpdateModal"
-                      data-uid="{{ row['uid'] }}"
-                      data-model="{{ row['asset']['model'] }}"
-                      data-make="{{ row['asset']['make'] }}"
-                      data-serial="{{ row['asset']['serial'] }}"
-                      data-ip="{{ row['asset']['ip'] }}"
-                      data-mac="{{ row['asset']['mac'] }}"
-                      data-date-issued="{{ row['asset']['date_issued'] }}"
-                      data-date-renewel="{{ row['asset']['date_renewel'] }}"
-                      data-condition="{{ row['asset']['condition'] }}"
-                      data-owner="{{ row['person']['name'] }}"
-                      data-location="{{ row['asset']['location'] }}">
-                      Edit Asset
-                    </a></li>
-
-
-                    <li class="divider"></li>
-                    <li><a href="#" data-toggle="modal" data-target="#confirmDeleteDialog" data-uid="{{ row['uid'] }}" class="open-confirmDeleteDialog">Delete Asset</a></li>
-                  </ul>
-                </div>
-              </td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
 
-        <!-- Edit Asset Modal -->
-
-        <!-- Deletion Confirm Modal -->
-        <div class="modal fade" id="confirmDeleteDialog" tabindex="-1" role="dialog">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-                <h4 class="modal-title">Are you sure?</h4>
-              </div>
-              <div class="modal-body">
-                It's usually good practice to keep assests for recordkeeping, even if they are removed from the network.<br/>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <a id="confirmDeleteButton" class="btn btn-danger" role="button" href="#">I am a bad person; confirm delete</a>
-              </div>
-            </div>
-          </div>
-        </div><!-- end modal -->
-
       </div> <!-- end col -->
 
     </div><!-- end row -->
+
   </div><!-- end container -->
+
+  <!-- Asset Add Modal -->
+  <div class="modal fade" id="assetAddModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <h4 class="modal-title" id="modalHeader">Add Asset - Manual</h4>
+        </div>
+        <div class="modal-body">
+          <form id="assetAddForm" method="POST" action="{{ url_for('assetAdd') }}">
+
+            <div class="form-group row">
+              <label for="uid" class="col-sm-4 form-control-label">UID</label>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" name="uid" placeholder="(automatically populated)" disabled>
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="model" class="col-sm-4 form-control-label">Model:</label>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" name="model"  placeholder="Model">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="make" class="col-sm-4 form-control-label">Make:</label>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" name="make" placeholder="Make">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="serial" class="col-sm-4 form-control-label">Serial #:</label>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" name="serial" placeholder="Serial">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="ip" class="col-sm-4 form-control-label">IP:</label>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" name="ip" placeholder="IP">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="mac" class="col-sm-4 form-control-label">MAC Address (WiFi):</label>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" name="mac" placeholder="MAC Address (Wifi)">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="date_issued" class="col-sm-4 form-control-label">Date Issued:</label>
+              <div class="col-sm-8">
+                <input type='text' class="form-control" name="date_issued" placeholder="Date Issued">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="date_renewel" class="col-sm-4 form-control-label">Date of Renewel:</label>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" name="date_renewel" placeholder="Date of Renewel">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="condition" class="col-sm-4 form-control-label">Physical Condition:</label>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" name="condition" placeholder="Physical Condition">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="owner" class="col-sm-4 form-control-label">Owner:</label>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" name="owner" placeholder="Owner">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="location" class="col-sm-4 form-control-label">Location:</label>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" name="location" placeholder="Location">
+              </div>
+            </div>
+
+          </form>
+
+        </div><!-- end modal body -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <input id="assetAddSubmit" form="assetAddForm" class="btn btn-primary" type="submit" value="Submit">
+        </div>
+      </div>
+    </div>
+  </div><!-- end modal -->
+
+
+  <!-- Inspect Asset Modal -->
+  <div class="modal fade" id="assetInspectModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <h4 class="modal-title" id="modalHeader">Inspect Asset</h4>
+        </div>
+        <div class="modal-body">
+          <form id="assetAddForm" method="POST" action="{{ url_for('assetUpdate') }}">
+
+            <div class="form-group row">
+              <label for="uid" class="col-sm-4 form-control-label">UID</label>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" name="uid" id="AssetFormUID" placeholder="(automatically populated)" disabled>
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="model" class="col-sm-4 form-control-label">Model:</label>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" name="model" id="AssetFormModel" placeholder="Model">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="make" class="col-sm-4 form-control-label">Make:</label>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" name="make" id="AssetFormMake" placeholder="Make">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="serial" class="col-sm-4 form-control-label">Serial #:</label>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" name="serial" id="AssetFormSerial" placeholder="Serial">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="ip" class="col-sm-4 form-control-label">IP:</label>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" name="ip" id="AssetFormIp" placeholder="IP">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="mac" class="col-sm-4 form-control-label">MAC Address (WiFi):</label>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" name="mac" id="AssetFormMac" placeholder="MAC Address (Wifi)">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="date_issued" class="col-sm-4 form-control-label">Date Issued:</label>
+              <div class="col-sm-8">
+                <input type='text' class="form-control" id="AssetFormDateIssued" name="date_issued" placeholder="Date Issued">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="date_renewel" class="col-sm-4 form-control-label">Date of Renewel:</label>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" name="date_renewel" id="AssetFormDateRenewel" placeholder="Date of Renewel">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="condition" class="col-sm-4 form-control-label">Physical Condition:</label>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" name="condition" id="AssetFormCondition" placeholder="Physical Condition">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="owner" class="col-sm-4 form-control-label">Owner:</label>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" name="owner" id="AssetFormOwner" placeholder="Owner">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="location" class="col-sm-4 form-control-label">Location:</label>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" name="location" id="AssetFormLocation" placeholder="Location">
+              </div>
+            </div>
+
+          </form>
+
+        </div><!-- end modal body -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button id="assetDeleteButton" type="button" class="btn btn-danger">Delete</button>
+          <input id="assetAddSubmit" form="assetAddForm" class="btn btn-primary" type="submit" value="Submit Changes">
+        </div>
+      </div>
+    </div>
+  </div><!-- end modal -->
+
+
+  <!-- Deletion Confirm Modal -->
+  <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <h4 class="modal-title">Are you sure?</h4>
+        </div>
+        <div class="modal-body">
+          It's usually good practice to keep assests for recordkeeping, even if they are removed from the network.<br/>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <a id="confirmDeleteButton" class="btn btn-danger" role="button" href="#">I am a bad person; confirm delete</a>
+        </div>
+      </div>
+    </div>
+  </div><!-- end modal -->
 
 </body>
 </html>

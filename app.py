@@ -148,6 +148,7 @@ def assetAdd():
     condition = request.form['condition']
     owner = request.form['owner']
     location = request.form['location']
+    notes = request.form['notes']
 
     statement = """MERGE (asset:Asset {
                     model:{model},
@@ -158,7 +159,8 @@ def assetAdd():
                     date_issued:{date_issued},
                     date_renewel:{date_renewel},
                     condition:{condition},
-                    location:{location}
+                    location:{location},
+                    notes:{notes}
                     })
 
                 MERGE (owner:Person {name:{owner}})

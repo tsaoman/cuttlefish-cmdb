@@ -33,13 +33,12 @@ $(document).ready(function() {
   var table = $('#assets').DataTable();
 
   $('#assets tbody').on( 'click', 'tr', function () {
-    console.log(table.row(this).data());
-    console.log(table.row(this).index())
     var data = table.row(this).data();
 
     var modal = $('#assetInspectModal');
     modal.modal('show');
 
+    //display current row data in form
     $(".modal-body #AssetFormUID").val(data[0]);
     $(".modal-body #AssetFormModel").val(data[1]);
     $(".modal-body #AssetFormMake").val(data[2]);
@@ -51,6 +50,8 @@ $(document).ready(function() {
     $(".modal-body #AssetFormCondition").val(data[8]);
     $(".modal-body #AssetFormOwner").val(data[9]);
     $(".modal-body #AssetFormLocation").val(data[10]);
+    $(".modal-body #AssetFormNotes").val(data[11]);
+
 
     //open confirm delete modal and pass data
     $('#assetDeleteButton').on('click', function () {
@@ -66,3 +67,6 @@ $(document).ready(function() {
   }); //end inspect modal open
 
 });
+
+//datepicker
+$('.datepicker').datepicker();

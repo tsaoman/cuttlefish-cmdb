@@ -196,7 +196,7 @@ def assetAdd():
 def assetUpdate():
 
     #locallize data
-    uid = int(request.form['uid'])
+    uid = request.form['uid']
     model = request.form['model']
     make = request.form['make']
     serial = request.form['serial']

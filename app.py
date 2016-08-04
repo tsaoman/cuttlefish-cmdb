@@ -44,7 +44,7 @@ RESTRICTED_DOMAIN = 'neotechnology.com'
 #======#
 
 app = Flask(__name__)
-app.debug = False
+app.debug = True
 app.secret_key = str(os.urandom(32))
 
 #database connect
@@ -76,7 +76,7 @@ def index():
     else:
         return redirect(url_for('login'))
 
-    data = graph.data("MATCH (b:Person)-[:OWNS]->(a:Asset) RETURN a AS asset, b AS person, id(a) AS uid, id(b) as pid")
+    data = graph.data("MATCH (owner:Person)-[:OWNS]->(asset:Asset)-[:HAS_IP]->(ip:Ip) RETURN asset, owner, ip, id(asset) AS uid")
 
     return render_template("index.html",data=data,username=username)
 
@@ -150,11 +150,11 @@ def assetAdd():
     location = request.form['location']
     notes = request.form['notes']
 
-    statement = """MERGE (asset:Asset {
+    statement = """
+                MERGE (asset:Asset {
                     model:{model},
                     make:{make},
                     serial:{serial},
-                    ip:{ip},
                     mac:{mac},
                     date_issued:{date_issued},
                     date_renewel:{date_renewel},
@@ -163,8 +163,12 @@ def assetAdd():
                     notes:{notes}
                     })
 
+                MERGE (ip:Ip {address:{ip}})
+                MERGE (asset)-[:HAS_IP]->(ip)
+
                 MERGE (owner:Person {name:{owner}})
-                MERGE (owner)-[:OWNS]->(asset)"""
+                MERGE (owner)-[:OWNS]->(asset)
+                """
 
     graph.run(statement,
                 model=model,
@@ -176,12 +180,13 @@ def assetAdd():
                 date_renewel=date_renewel,
                 condition=condition,
                 location=location,
-                owner=owner)
+                owner=owner,
+                notes=notes)
 
     return redirect("/")
 
 # GET
-@app.route('/api/return/person/<person>',methods=['GET'])
+@app.route('/api/return/person/<person>', methods=['GET'])
 def returnPerson(person):
 
     statement = "MATCH (a:Person {name:{person}}) RETURN a AS person"
@@ -199,7 +204,7 @@ def returnAsset(asset):
 
 #UPDATE
 
-@app.route('/api/update/asset/',methods=['POST'])
+@app.route('/api/update/asset/', methods=['POST'])
 def assetUpdate():
 
     #locallize data
@@ -214,22 +219,42 @@ def assetUpdate():
     condition = request.form['condition']
     owner = request.form['owner']
     location = request.form['location']
+    notes = request.form['notes']
 
-    statement = """OPTIONAL MATCH (asset:Asset)-[r]-(person:Person)
+    statement = """
+                MATCH (asset:Asset)
                 WHERE id(asset)={uid}
-                delete r
+
                 SET asset.model={model}
                 SET asset.make={make}
                 SET asset.serial={serial}
-                SET asset.ip={ip}
+
                 SET asset.mac={mac}
                 SET asset.date_issued={date_issued}
                 SET asset.date_renewel={date_renewel}
                 SET asset.condition={condition}
                 SET asset.location={location}
-                MERGE (person:Person {name:{owner}})
-                MERGE (person)-[:OWNS]->(asset)
+                SET asset.notes={notes}
 
+                MERGE (ip:Ip {address:{ip}})
+                WITH asset, ip
+                OPTIONAL MATCH (asset)-[rip:HAS_IP]->(ip0:Ip)
+
+                FOREACH(x IN (CASE WHEN ip <> ip0   THEN [1] ELSE [] END) |
+                    DETACH DELETE rip
+                    MERGE (asset)-[:HAS_IP]->(ip)
+                    MERGE (asset)-[:HAS_PREVIOUS_IP]->(ip0)
+                )
+
+                MERGE (owner:Person {name:{owner}})
+                WITH asset, owner
+                OPTIONAL MATCH (asset)<-[rown:OWNS]-(owner0:Person)
+
+                FOREACH(x IN (CASE WHEN owner <> owner0 THEN [1] ELSE [] END) |
+                    DETACH DELETE rown
+                    MERGE (asset)<-[:OWNS]-(owner)
+                    MERGE (asset)<-[:PREVIOUSLY_OWNED]-(owner0)
+                )
                 """
 
     graph.run(statement,
@@ -242,9 +267,11 @@ def assetUpdate():
                 date_issued=date_issued,
                 date_renewel=date_renewel,
                 condition=condition,
-                location=location)
+                owner=owner,
+                location=location,
+                notes=notes)
 
-    return redirect("/")
+    return redirect(url_for('index'))
 
 #delete
 @app.route('/api/delete/asset/<int:uid>',methods=['GET'])
@@ -255,10 +282,21 @@ def assetDeleteByUID(uid):
 
     return redirect("/")
 
-#auth
-@app.route('/auth/oauth2callback')
-def authCallback():
-    pass
+#clean
+@app.route('/api/cleanup')
+def cleanup():
+
+    statement = """
+                MATCH (owner:Person)
+                MATCH (ip:Ip)
+                delete owner, ip
+                """
+
+    graph.run(statement)
+
+    return redirect(url_for('index'))
+
+
 
 #=====#
 # RUN #

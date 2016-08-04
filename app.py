@@ -110,11 +110,14 @@ def login():
 @app.route('/oauth2callback',methods=['GET','POST'])
 def oauth2callback():
 
-    flow = client.flow_from_clientsecrets(
-        'shadow/client_secrets.json',
+    flow = client.OAuth2WebServerFlow(
+        os.environ['CLIENT_ID'],
+        os.environ['CLIENT_SECRET'],
         scope = 'https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.profile.emails.read',
-        redirect_uri = 'http://localhost:5000/oauth2callback'
+        redirect_uri = os.environ['REDIRECT_URI'],
     )
+
+
 
     if 'code' not in request.args:
         auth_uri = flow.step1_get_authorize_url()

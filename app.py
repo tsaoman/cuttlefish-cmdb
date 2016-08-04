@@ -38,7 +38,7 @@ import os, sys, httplib2, json, apiclient
 #=============#
 
 AUTH_REQUIRED = 2
-RESTRICTED_DOMAIN = 'neotechnology.com'
+# RESTRICTED_DOMAIN = 'neotechnology.com'
 
 #======#
 # MAIN #
@@ -98,7 +98,7 @@ def login():
         plus_service = apiclient.discovery.build('plus','v1',http=http_auth)
         profile = plus_service.people().get(userId='me').execute()
 
-        if 'domain' in profile and profile['domain'] == RESTRICTED_DOMAIN:
+        if 'domain' in profile and profile['domain'] == os.environ['RESTRICTED_DOMAIN']:
             session['username'] = profile['displayName']
             session['email'] = profile['emails'][0]['value']
 

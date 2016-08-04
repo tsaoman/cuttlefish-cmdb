@@ -29,6 +29,7 @@ from flask import Flask, render_template, url_for, request, redirect, session, j
 from flask_basicauth import BasicAuth
 from oauth2client import client
 from py2neo import Graph
+from uuid import uuid4
 
 import os, sys, httplib2, json, apiclient
 
@@ -76,7 +77,7 @@ def index():
     else:
         return redirect(url_for('login'))
 
-    data = graph.data("MATCH (owner:Person)-[:OWNS]->(asset:Asset)-[:HAS_IP]->(ip:Ip) RETURN asset, owner, ip, id(asset) AS uid")
+    data = graph.data("MATCH (owner:Person)-[:OWNS]->(asset:Asset)-[:HAS_IP]->(ip:Ip) RETURN asset, owner, ip, id(asset) AS iid")
 
     return render_template("index.html",data=data,username=username)
 
@@ -137,6 +138,8 @@ def logout():
 @app.route('/api/add/asset', methods=['POST'])
 def assetAdd():
 
+    uid = str(uuid4())#generate uid
+
     #localaize data
     model = request.form['model']
     make = request.form['make']
@@ -152,6 +155,7 @@ def assetAdd():
 
     statement = """
                 MERGE (asset:Asset {
+                    uid:{uid},
                     model:{model},
                     make:{make},
                     serial:{serial},
@@ -171,6 +175,7 @@ def assetAdd():
                 """
 
     graph.run(statement,
+                uid=uid,
                 model=model,
                 make=make,
                 serial=serial,
@@ -184,23 +189,6 @@ def assetAdd():
                 notes=notes)
 
     return redirect("/")
-
-# GET
-@app.route('/api/return/person/<person>', methods=['GET'])
-def returnPerson(person):
-
-    statement = "MATCH (a:Person {name:{person}}) RETURN a AS person"
-    data = graph.data(statement,person=person)[0]['person']
-
-    return str(data)
-
-@app.route('/api/return/asset/<asset>',methods=['GET'])
-def returnAsset(asset):
-
-    statement = "MATCH (a:Asset {model:{asset}}) RETURN a AS asset"
-    data = graph.data(statement,asset=asset)[0]['asset']
-
-    return str(data)
 
 #UPDATE
 
@@ -222,8 +210,7 @@ def assetUpdate():
     notes = request.form['notes']
 
     statement = """
-                MATCH (asset:Asset)
-                WHERE id(asset)={uid}
+                MATCH (asset:Asset {uid:{uid}})
 
                 SET asset.model={model}
                 SET asset.make={make}
@@ -274,10 +261,10 @@ def assetUpdate():
     return redirect(url_for('index'))
 
 #delete
-@app.route('/api/delete/asset/<int:uid>',methods=['GET'])
+@app.route('/api/delete/asset/<uid>',methods=['GET'])
 def assetDeleteByUID(uid):
 
-    statement = "MATCH (asset:Asset) WHERE id(asset)={uid} DETACH DELETE asset"
+    statement = "MATCH (asset:Asset {uid:{uid}}) DETACH DELETE asset"
     graph.run(statement, uid=uid)
 
     return redirect("/")
@@ -286,10 +273,15 @@ def assetDeleteByUID(uid):
 @app.route('/api/cleanup')
 def cleanup():
 
+    #gets rid of owners or
     statement = """
-                MATCH (owner:Person)
-                MATCH (ip:Ip)
-                delete owner, ip
+                MATCH (a:Owner)
+                WHERE size((a)--()) = 0
+                DELETE a
+
+                MATCH (a:Ip)
+                WHERE size((a)--()) = 0
+                DELETE a
                 """
 
     graph.run(statement)

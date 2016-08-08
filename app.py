@@ -31,7 +31,7 @@ from oauth2client import client
 from py2neo import Graph
 from uuid import uuid4
 
-import os, sys, httplib2, json, apiclient
+import os, sys, httplib2, json, apiclient, time
 
 #=============#
 # CONFIG VARS #
@@ -51,13 +51,15 @@ app.secret_key = str(os.urandom(32))
 #database connect
 graph = Graph(os.environ.get('GRAPHENEDB_URL', 'http://localhost:7474'),bolt=False)
 
-#auth
+#basic auth
 
 if AUTH_REQUIRED == 1:
     app.config['BASIC_AUTH_USERNAME'] = 'user'
     app.config['BASIC_AUTH_PASSWORD'] = 'password'
     app.config['BASIC_AUTH_FORCE'] = True
     basic_auth = BasicAuth(app)
+
+# handling time
 
 #==================#
 # GLOBAL FUNCTIONS
@@ -79,7 +81,13 @@ def index():
 
     data = graph.data("MATCH (owner:Person)-[:OWNS]->(asset:Asset)-[:HAS_IP]->(ip:Ip) RETURN asset, owner, ip, id(asset) AS iid")
 
-    return render_template("index.html",data=data,username=username)
+    #convert POSIX time to user readable
+    for row in data:
+        row['asset']['date_issued'] = time.strftime("%m/%d/%Y", time.gmtime(int(row['asset']['date_issued'])))
+        row['asset']['date_renewel'] = time.strftime("%m/%d/%Y", time.gmtime(int(row['asset']['date_renewel'])))
+
+    #return data[0]['asset']['date_issued']
+    return render_template("index.html", title="Asset Data", data=data, username=username)
 
 #auth routes
 
@@ -116,8 +124,6 @@ def oauth2callback():
         scope = 'https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.profile.emails.read',
         redirect_uri = os.environ['REDIRECT_URI'],
     )
-
-
 
     if 'code' not in request.args:
         auth_uri = flow.step1_get_authorize_url()
@@ -184,8 +190,8 @@ def assetAdd():
                 serial=serial,
                 ip=ip,
                 mac=mac,
-                date_issued=date_issued,
-                date_renewel=date_renewel,
+                date_issued=int(time.mktime(time.strptime(date_issued,'%m/%d/%Y'))),
+                date_renewel=int(time.mktime(time.strptime(date_renewel,'%m/%d/%Y'))),
                 condition=condition,
                 location=location,
                 owner=owner,
@@ -254,8 +260,8 @@ def assetUpdate():
                 serial=serial,
                 ip=ip,
                 mac=mac,
-                date_issued=date_issued,
-                date_renewel=date_renewel,
+                date_issued=int(time.mktime(time.strptime(date_issued,'%m/%d/%Y'))),
+                date_renewel=int(time.mktime(time.strptime(date_renewel,'%m/%d/%Y'))),
                 condition=condition,
                 owner=owner,
                 location=location,
@@ -271,6 +277,28 @@ def assetDeleteByUID(uid):
     graph.run(statement, uid=uid)
 
     return redirect("/")
+
+@app.route('/renewals')
+def renewals():
+
+    if 'username' in session:
+        username = session['username']
+    else:
+        return redirect(url_for('login'))
+
+    statement = """
+                MATCH (owner:Person)-[:OWNS]->(asset:Asset)-[:HAS_IP]->(ip:Ip)
+                WHERE (asset.date_renewel - 121000000.0) < (timestamp() / 1000.0)
+                RETURN asset, owner, ip, id(asset) AS iid
+                """
+    #1.21E6 = 2 weeks
+    data = graph.data(statement)
+
+    for row in data:
+        row['asset']['date_issued'] = time.strftime("%m/%d/%Y", time.gmtime(int(row['asset']['date_issued'])))
+        row['asset']['date_renewel'] = time.strftime("%m/%d/%Y", time.gmtime(int(row['asset']['date_renewel'])))
+
+    return render_template("index.html", title="New Renewals", data=data, username=username)
 
 #clean
 @app.route('/api/cleanup')
@@ -290,8 +318,6 @@ def cleanup():
     graph.run(statement)
 
     return redirect(url_for('index'))
-
-
 
 #=====#
 # RUN #

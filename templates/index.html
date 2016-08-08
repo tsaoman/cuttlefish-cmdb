@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <html>
 
+
 <head>
   <meta name="viewport" content = "width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -57,6 +58,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <button type="button" class="btn btn-primary">Scan Network</button>
           <button type="button" class="btn btn-primary">Upload File</button>
           <button type="button" class="btn btn-primary open-assetAddModal" data-toggle="modal" data-target="#assetAddModal">Manual Add</button>
+          <a class="btn btn-primary" href="/renewals" role="button">View Renewals</a>
           <button type="button" class="btn btn-primary">Settings</button>
           <button type="button" class="btn btn-primary">About</button>
         </div>
@@ -65,7 +67,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
       <div class="col-md-10">
 
-        <h2>Asset Data</h2>
+        <h2>{{ title }}</h2>
 
         <table id="assets" class="table table-hover" cellspacing="0" width="100%">
           <thead>
@@ -86,6 +88,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             </tr>
           </thead>
           <tbody>
+
             {% for row in data %}<!-- parse datastring from cypher -->
             <tr>
               <td id="uid">{{ row['asset']['uid'] }}</td>
@@ -175,9 +178,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             </div>
 
             <div class="form-group row">
-              <label for="date_renewel" class="col-sm-4 form-control-label">Date of Renewel:</label>
+              <label for="date_renewel" class="col-sm-4 form-control-label">Date of Renewal:</label>
               <div class="col-sm-8">
-                <input data-provide="datepicker" type="text" class="form-control datepicker" name="date_renewel" date-provide="datepicker" placeholder="Date of Renewel">
+                <input data-provide="datepicker" type="text" class="form-control" name="date_renewel" placeholder="Date of Renewel">
               </div>
             </div>
 

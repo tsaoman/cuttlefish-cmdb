@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+  <head>
+    {% block head %}
+
+    <meta name="viewport" content = "width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <!-- Boostrap / Datatables CDN -->
+
+    <!-- <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs-3.3.6/jqc-1.12.3/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.1/b-colvis-1.2.1/b-html5-1.2.1/b-print-1.2.1/fc-3.2.2/sc-1.4.2/datatables.min.css"/> -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs-3.3.6/jq-2.2.3/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.2/b-colvis-1.2.2/b-html5-1.2.2/b-print-1.2.2/r-2.1.0/datatables.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/static/css/datepicker.css"/>
+    <link rel="stylesheet" type="text/css" href="/static/css/ui.css"/>
+
+    <!-- <script type="text/javascript" src="https://cdn.datatables.net/v/bs-3.3.6/jqc-1.12.3/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.1/b-colvis-1.2.1/b-html5-1.2.1/b-print-1.2.1/fc-3.2.2/sc-1.4.2/datatables.min.js"></script> -->
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs-3.3.6/jq-2.2.3/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.2/b-colvis-1.2.2/b-html5-1.2.2/b-print-1.2.2/r-2.1.0/datatables.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.2/js/bootstrap-datepicker.js"></script>
+    <!-- <script type="text/javascript" src="/static/js/bootstrap-datepicker.js"></script> -->
+    <script type="text/javascript" src="/static/js/ui.js"></script>
+
+    <title>{% block title %}{% endblock %} - Cuttlefish CMDB</title>
+
+    {% endblock %}
+  </head>
+  <body>
+
+    <!-- navbar -->
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Cuttlefish CMDB</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+
+            <li><a href="#" class="open-assetAddModal" data-toggle="modal" data-target="#assetAddModal">Manual Add</a></li>
+            <li><a href="/renewals">View Renewals</a></li>
+            <li><a href="#">Settings</a></li>
+            <li><a href="#">About</a></li>
+          </ul>
+
+          <p class="navbar-text navbar-right">Signed in as <a href="#" class="navbar-link">{{ username }}</a></p>
+
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav><!-- end navbar-->
+
+    <div id="content">{% block content %}{% endblock %}</div>
+
+    <div id="footer">
+      {% block footer %}
+      <div class="footer navbar-fixed-bottom">
+        <div class="container">
+          <p class="text-muted">&copy; Copyright 2016 by <a href="https://github.com/tsaoman/cuttlefish-cmdb">Brandon Tsao</a>.</p>
+        </div>
+      </div>
+      {% endblock %}
+    </div>
+  </body>
+</html>

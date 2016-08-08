@@ -17,100 +17,60 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<!DOCTYPE html>
+{% extends "layout.html" %}
+{% block title %} Home {% endblock %}
 
-<html>
+{% block head %}
+  {{ super() }}
+{% endblock %}
 
-
-<head>
-  <meta name="viewport" content = "width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-
-  <!-- Boostrap / Datatables CDN -->
-
-  <!-- <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs-3.3.6/jqc-1.12.3/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.1/b-colvis-1.2.1/b-html5-1.2.1/b-print-1.2.1/fc-3.2.2/sc-1.4.2/datatables.min.css"/> -->
-  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs-3.3.6/jq-2.2.3/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.2/b-colvis-1.2.2/b-html5-1.2.2/b-print-1.2.2/r-2.1.0/datatables.min.css"/>
-  <link rel="stylesheet" type="text/css" href="/static/css/datepicker.css"/>
-  <link rel="stylesheet" type="text/css" href="/static/css/ui.css"/>
-
-  <!-- <script type="text/javascript" src="https://cdn.datatables.net/v/bs-3.3.6/jqc-1.12.3/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.1/b-colvis-1.2.1/b-html5-1.2.1/b-print-1.2.1/fc-3.2.2/sc-1.4.2/datatables.min.js"></script> -->
-  <script type="text/javascript" src="https://cdn.datatables.net/v/bs-3.3.6/jq-2.2.3/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.2/b-colvis-1.2.2/b-html5-1.2.2/b-print-1.2.2/r-2.1.0/datatables.min.js"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.2/js/bootstrap-datepicker.js"></script>
-  <!-- <script type="text/javascript" src="/static/js/bootstrap-datepicker.js"></script> -->
-  <script type="text/javascript" src="/static/js/ui.js"></script>
-
-</head>
+{% block content %}
 
 <body class="body">
 
   <div class="container">
-    <h1>Cuttlefish CMDB</h1>
 
-    <div class="row">
+    <h1>{{ title }}</h1>
 
-      <div class="col-md-2">
+    <table id="assets" class="table table-hover" cellspacing="0" width="100%">
+      <thead>
+        <tr>
+          <th class="default_hidden">UID</th>
+          <th>Model</th>
+          <th >Make</th>
+          <th>Serial</th>
+          <th>IP</th>
+          <th>MAC Address (Wifi)</th>
+          <th>Date Issued</th>
+          <th>Renewal Date</th>
+          <th class="default_hidden">Physical Condition</th>
+          <th>Owner</th>
+          <th class="default_hidden">Location</th>
+          <th class="default_hidden">Notes</th>
 
-        <p>You are logged in as <b>{{ username }}</b></p>
+        </tr>
+      </thead>
+      <tbody>
 
-        <h2>Actions</h2>
+        {% for row in data %}<!-- parse datastring from cypher -->
+        <tr>
+          <td id="uid">{{ row['asset']['uid'] }}</td>
+          <td>{{ row['asset']['model'] }}</td>
+          <td>{{ row['asset']['make'] }}</td>
+          <td>{{ row['asset']['serial'] }}</td>
+          <td>{{ row['ip']['address'] }}</td>
+          <td>{{ row['asset']['mac'] }}</td>
+          <td>{{ row['asset']['date_issued'] }}</td>
+          <td>{{ row['asset']['date_renewal'] }}
+          <td>{{ row['asset']['condition'] }}</td>
+          <td>{{ row['owner']['name'] }}</td>
+          <td>{{ row['asset']['location'] }}</td>
+          <td>{{ row['asset']['notes'] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
 
-        <div class="btn-group-vertical">
-          <button type="button" class="btn btn-primary">Scan Network</button>
-          <button type="button" class="btn btn-primary">Upload File</button>
-          <button type="button" class="btn btn-primary open-assetAddModal" data-toggle="modal" data-target="#assetAddModal">Manual Add</button>
-          <a class="btn btn-primary" href="/renewals" role="button">View Renewals</a>
-          <button type="button" class="btn btn-primary">Settings</button>
-          <button type="button" class="btn btn-primary">About</button>
-        </div>
-
-      </div> <!-- end col -->
-
-      <div class="col-md-10">
-
-        <h2>{{ title }}</h2>
-
-        <table id="assets" class="table table-hover" cellspacing="0" width="100%">
-          <thead>
-            <tr>
-              <th class="default_hidden">UID</th>
-              <th>Model</th>
-              <th >Make</th>
-              <th>Serial</th>
-              <th>IP</th>
-              <th>MAC Address (Wifi)</th>
-              <th>Date Issued</th>
-              <th>Renewel Date</th>
-              <th class="default_hidden">Physical Condition</th>
-              <th>Owner</th>
-              <th class="default_hidden">Location</th>
-              <th class="default_hidden">Notes</th>
-
-            </tr>
-          </thead>
-          <tbody>
-
-            {% for row in data %}<!-- parse datastring from cypher -->
-            <tr>
-              <td id="uid">{{ row['asset']['uid'] }}</td>
-              <td>{{ row['asset']['model'] }}</td>
-              <td>{{ row['asset']['make'] }}</td>
-              <td>{{ row['asset']['serial'] }}</td>
-              <td>{{ row['ip']['address'] }}</td>
-              <td>{{ row['asset']['mac'] }}</td>
-              <td>{{ row['asset']['date_issued'] }}</td>
-              <td>{{ row['asset']['date_renewel'] }}
-              <td>{{ row['asset']['condition'] }}</td>
-              <td>{{ row['owner']['name'] }}</td>
-              <td>{{ row['asset']['location'] }}</td>
-              <td>{{ row['asset']['notes'] }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-
-      </div> <!-- end col -->
-
-    </div><!-- end row -->
 
   </div><!-- end container -->
 
@@ -178,9 +138,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             </div>
 
             <div class="form-group row">
-              <label for="date_renewel" class="col-sm-4 form-control-label">Date of Renewal:</label>
+              <label for="date_renewal" class="col-sm-4 form-control-label">Date of Renewal:</label>
               <div class="col-sm-8">
-                <input data-provide="datepicker" type="text" class="form-control" name="date_renewel" placeholder="Date of Renewel">
+                <input data-provide="datepicker" type="text" class="form-control" name="date_renewal" placeholder="Date of renewal">
               </div>
             </div>
 
@@ -288,9 +248,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             </div>
 
             <div class="form-group row">
-              <label for="date_renewel" class="col-sm-4 form-control-label">Date of Renewel:</label>
+              <label for="date_renewal" class="col-sm-4 form-control-label">Date of renewal:</label>
               <div class="col-sm-8">
-                <input data-provide="datepicker" type="text" class="form-control" name="date_renewel" id="AssetFormDateRenewel" placeholder="Date of Renewel">
+                <input data-provide="datepicker" type="text" class="form-control" name="date_renewal" id="AssetFormDaterenewal" placeholder="Date of renewal">
               </div>
             </div>
 
@@ -335,7 +295,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     </div>
   </div><!-- end modal -->
 
-
   <!-- Deletion Confirm Modal -->
   <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
@@ -358,4 +317,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   </div><!-- end modal -->
 
 </body>
-</html>
+
+{% endblock %}

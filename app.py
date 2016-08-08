@@ -83,8 +83,12 @@ def index():
 
     #convert POSIX time to user readable
     for row in data:
-        row['asset']['date_issued'] = time.strftime("%m/%d/%Y", time.gmtime(int(row['asset']['date_issued'])))
-        row['asset']['date_renewel'] = time.strftime("%m/%d/%Y", time.gmtime(int(row['asset']['date_renewel'])))
+
+        try:
+            row['asset']['date_issued'] = time.strftime("%m/%d/%Y", time.gmtime(int(row['asset']['date_issued'])))
+            row['asset']['date_renewal'] = time.strftime("%m/%d/%Y", time.gmtime(int(row['asset']['date_renewal'])))
+        except:
+            pass
 
     #return data[0]['asset']['date_issued']
     return render_template("index.html", title="Asset Data", data=data, username=username)
@@ -156,7 +160,7 @@ def assetAdd():
     ip = request.form['ip']
     mac = request.form['mac']
     date_issued = request.form['date_issued']
-    date_renewel = request.form['date_renewel']
+    date_renewal = request.form['date_renewal']
     condition = request.form['condition']
     owner = request.form['owner']
     location = request.form['location']
@@ -170,7 +174,7 @@ def assetAdd():
                     serial:{serial},
                     mac:{mac},
                     date_issued:{date_issued},
-                    date_renewel:{date_renewel},
+                    date_renewal:{date_renewal},
                     condition:{condition},
                     location:{location},
                     notes:{notes}
@@ -191,7 +195,7 @@ def assetAdd():
                 ip=ip,
                 mac=mac,
                 date_issued=int(time.mktime(time.strptime(date_issued,'%m/%d/%Y'))),
-                date_renewel=int(time.mktime(time.strptime(date_renewel,'%m/%d/%Y'))),
+                date_renewal=int(time.mktime(time.strptime(date_renewal,'%m/%d/%Y'))),
                 condition=condition,
                 location=location,
                 owner=owner,
@@ -212,7 +216,7 @@ def assetUpdate():
     ip = request.form['ip']
     mac = request.form['mac']
     date_issued = request.form['date_issued']
-    date_renewel = request.form['date_renewel']
+    date_renewal = request.form['date_renewal']
     condition = request.form['condition']
     owner = request.form['owner']
     location = request.form['location']
@@ -227,7 +231,7 @@ def assetUpdate():
 
                 SET asset.mac={mac}
                 SET asset.date_issued={date_issued}
-                SET asset.date_renewel={date_renewel}
+                SET asset.date_renewal={date_renewal}
                 SET asset.condition={condition}
                 SET asset.location={location}
                 SET asset.notes={notes}
@@ -261,7 +265,7 @@ def assetUpdate():
                 ip=ip,
                 mac=mac,
                 date_issued=int(time.mktime(time.strptime(date_issued,'%m/%d/%Y'))),
-                date_renewel=int(time.mktime(time.strptime(date_renewel,'%m/%d/%Y'))),
+                date_renewal=int(time.mktime(time.strptime(date_renewal,'%m/%d/%Y'))),
                 condition=condition,
                 owner=owner,
                 location=location,
@@ -288,7 +292,7 @@ def renewals():
 
     statement = """
                 MATCH (owner:Person)-[:OWNS]->(asset:Asset)-[:HAS_IP]->(ip:Ip)
-                WHERE (asset.date_renewel - 121000000.0) < (timestamp() / 1000.0)
+                WHERE (asset.date_renewal - 121000000.0) < (timestamp() / 1000.0)
                 RETURN asset, owner, ip, id(asset) AS iid
                 """
     #1.21E6 = 2 weeks
@@ -296,7 +300,7 @@ def renewals():
 
     for row in data:
         row['asset']['date_issued'] = time.strftime("%m/%d/%Y", time.gmtime(int(row['asset']['date_issued'])))
-        row['asset']['date_renewel'] = time.strftime("%m/%d/%Y", time.gmtime(int(row['asset']['date_renewel'])))
+        row['asset']['date_renewal'] = time.strftime("%m/%d/%Y", time.gmtime(int(row['asset']['date_renewal'])))
 
     return render_template("index.html", title="New Renewals", data=data, username=username)
 

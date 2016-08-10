@@ -25,13 +25,14 @@
 # MODULES #
 #=========#
 
-from flask import Flask, render_template, url_for, request, redirect, session, jsonify, abort
-from flask_basicauth import BasicAuth
+from flask import Flask, render_template, url_for, request, redirect, session, abort, flash
 from oauth2client import client
 from py2neo import Graph
 from uuid import uuid4
-
-import os, sys, httplib2, json, apiclient, time
+import os
+import httplib2
+import apiclient
+import time
 
 #=============#
 # CONFIG VARS #
@@ -51,20 +52,9 @@ app.secret_key = str(os.urandom(32))
 #database connect
 graph = Graph(os.environ.get('GRAPHENEDB_URL', 'http://localhost:7474'),bolt=False)
 
-#basic auth
-
-if AUTH_REQUIRED == 1:
-    app.config['BASIC_AUTH_USERNAME'] = 'user'
-    app.config['BASIC_AUTH_PASSWORD'] = 'password'
-    app.config['BASIC_AUTH_FORCE'] = True
-    basic_auth = BasicAuth(app)
-
-# handling time
-
 #==================#
-# GLOBAL FUNCTIONS
+# GLOBAL FUNCTIONS #
 #==================#
-
 
 #========#
 # ROUTES #
@@ -84,13 +74,16 @@ def index():
     #convert POSIX time to user readable
     for row in data:
 
-        try:
-            row['asset']['date_issued'] = time.strftime("%m/%d/%Y", time.gmtime(int(row['asset']['date_issued'])))
-            row['asset']['date_renewal'] = time.strftime("%m/%d/%Y", time.gmtime(int(row['asset']['date_renewal'])))
-        except:
-            pass
+        date_issued = row['asset']['date_issued']
+        if date_issued is not None:
+            row['asset']['date_issued'] = time.strftime("%m/%d/%Y", time.gmtime(int(date_issued)))
+            if (int(date_issued) - 1.21E6) < time.time():
+                flash('There are assets up for renewel')
 
-    #return data[0]['asset']['date_issued']
+        date_renewal = row['asset']['date_renewal']
+        if date_renewal is not None:
+            row['asset']['date_renewal'] = time.strftime("%m/%d/%Y", time.gmtime(int(date_renewal)))
+
     return render_template("index.html", title="Asset Data", data=data, username=username)
 
 #auth routes
@@ -127,6 +120,8 @@ def oauth2callback():
         os.environ['CLIENT_SECRET'],
         scope = 'https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.profile.emails.read',
         redirect_uri = os.environ['REDIRECT_URI'],
+        token_uri = os.environ['TOKEN_URI'],
+        auth_provider_x509_cert_url = os.environ['AUTH_PROVIDER_X509_CERT_URL']
     )
 
     if 'code' not in request.args:
@@ -283,6 +278,7 @@ def assetDeleteByUID(uid):
     return redirect("/")
 
 @app.route('/renewals')
+
 def renewals():
 
     if 'username' in session:
@@ -296,7 +292,10 @@ def renewals():
                 RETURN asset, owner, ip, id(asset) AS iid
                 """
     #1.21E6 = 2 weeks
-    data = graph.data(statement)
+    try:
+        data = graph.data(statement)
+    except ValueError:
+        pass
 
     for row in data:
         row['asset']['date_issued'] = time.strftime("%m/%d/%Y", time.gmtime(int(row['asset']['date_issued'])))

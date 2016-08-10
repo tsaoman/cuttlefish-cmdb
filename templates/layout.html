@@ -36,7 +36,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">Cuttlefish CMDB</a>
+          <a class="navbar-brand" href="/">Cuttlefish CMDB</a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
@@ -55,6 +55,20 @@
       </div><!-- /.container-fluid -->
     </nav><!-- end navbar-->
 
+    <!-- flash messages -->
+    <div class="container">
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <ul class="flashes" style="border-radius:10px; background: red; color: white;">
+          {% for message in messages %}
+            <li>{{ message}}</li>
+          {% endfor %}
+          </ul>
+        {% endif %}
+      {% endwith %}<!-- end flash messages-->
+    </div>
+
+
     <div id="content">{% block content %}{% endblock %}</div>
 
     <div id="footer">
@@ -66,5 +80,8 @@
       </div>
       {% endblock %}
     </div>
+    <!-- end nav bar-->
+
+
   </body>
 </html>

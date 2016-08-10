@@ -1,11 +1,15 @@
 #emacs
 *~
 
+#env
+.env
+
 #OS X
 .DS_Store
 
 #virtualenv
 bin/
+lib/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -96,3 +100,6 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+#scans
+*.xml

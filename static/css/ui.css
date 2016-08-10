@@ -1,0 +1,10 @@
+#assets td {
+  cursor: pointer;
+  cursor: hand;
+}
+
+#flashes {
+  border-radius:10px;
+  background: red;
+  color: white;
+}

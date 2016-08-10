@@ -119,8 +119,8 @@ def oauth2callback():
         os.environ['CLIENT_ID'],
         os.environ['CLIENT_SECRET'],
         scope = 'https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.profile.emails.read',
-        redirect_uri = os.environ['REDIRECT_URI'],
-        token_uri = os.environ['TOKEN_URI'],
+        redirect_uri=os.environ['REDIRECT_URI'],
+        token_uri=os.environ['TOKEN_URI'],
         auth_provider_x509_cert_url = os.environ['AUTH_PROVIDER_X509_CERT_URL']
     )
 

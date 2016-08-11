@@ -327,6 +327,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <h4 class="modal-title">File Upload</h4>
         </div>
         <div class="modal-body">
+          <p>You file contents will be scanned for relevant data. You will be given the oppourtinity to review the data before it is commited to the databse.</p>
           <form id="uploadFileForm" action="{{ url_for('uploadFile') }}" method="POST" enctype=multipart/form-data>
             <input type=file name=file>
           </form>

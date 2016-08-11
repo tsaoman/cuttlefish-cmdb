@@ -28,6 +28,7 @@
 from flask import Flask, render_template, url_for, request, redirect, session, abort, flash
 from oauth2client import client
 from werkzeug.utils import secure_filename
+from functools import wraps
 from py2neo import Graph
 from uuid import uuid4
 import os
@@ -65,6 +66,16 @@ ALLOWED_EXTENSIONS = set(['xml'])
 # GLOBAL FUNCTIONS #
 #==================#
 
+def loginRequired(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'username' not in session:
+            return redirect(url_for('login'))
+
+        return f(*args, **kwargs)
+
+    return decorated_function
+
 def allowed_file(filename):
     return '.' in filename and \
     filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
@@ -75,12 +86,8 @@ def allowed_file(filename):
 
 #index
 @app.route('/')
+@loginRequired
 def index():
-
-    if 'username' in session:
-        username = session['username']
-    else:
-        return redirect(url_for('login'))
 
     data = graph.data("MATCH (owner:Person)-[:OWNS]->(asset:Asset)-[:HAS_IP]->(ip:Ip) RETURN asset, owner, ip, id(asset) AS iid")
 
@@ -100,7 +107,7 @@ def index():
     if flash_flag:
         flash('There are assets up for renewel')
 
-    return render_template("index.html", title="Asset Data", data=data, username=username)
+    return render_template("index.html", title="Asset Data", data=data, username=session['username'])
 
 #auth routes
 
@@ -160,6 +167,7 @@ def logout():
 
 #add new assets / items
 @app.route('/api/add/asset', methods=['POST'])
+@loginRequired
 def assetAdd():
 
     uid = str(uuid4())#generate uid
@@ -217,6 +225,7 @@ def assetAdd():
 #UPDATE
 
 @app.route('/api/update/asset/', methods=['POST'])
+@loginRequired
 def assetUpdate():
 
     #locallize data
@@ -286,6 +295,7 @@ def assetUpdate():
 
 #delete
 @app.route('/api/delete/asset/<uid>',methods=['GET'])
+@loginRequired
 def assetDeleteByUID(uid):
 
     statement = "MATCH (asset:Asset {uid:{uid}}) DETACH DELETE asset"
@@ -294,13 +304,9 @@ def assetDeleteByUID(uid):
     return redirect("/")
 
 @app.route('/renewals')
+@loginRequired
 
 def renewals():
-
-    if 'username' in session:
-        username = session['username']
-    else:
-        return redirect(url_for('login'))
 
     statement = """
                 MATCH (owner:Person)-[:OWNS]->(asset:Asset)-[:HAS_IP]->(ip:Ip)
@@ -317,10 +323,12 @@ def renewals():
         row['asset']['date_issued'] = time.strftime("%m/%d/%Y", time.gmtime(int(row['asset']['date_issued'])))
         row['asset']['date_renewal'] = time.strftime("%m/%d/%Y", time.gmtime(int(row['asset']['date_renewal'])))
 
-    return render_template("index.html", title="New Renewals", data=data, username=username)
+    return render_template("index.html", title="New Renewals", data=data, username=session['username'])
 
 @app.route('/api/upload', methods=['GET','POST'])
+@loginRequired
 def uploadFile():
+
     if request.method == 'POST':
         if 'file' not in request.files:
             flash('No file part')
@@ -337,9 +345,10 @@ def uploadFile():
             data = parseXML(filename)
             session['upload_data'] = data
 
-    return render_template("upload.html", data=data)
+    return render_template("upload.html", data=data, username=session['username'])
 
 @app.route('/api/upload/add')
+@loginRequired
 def uploadAdd():
 
     data = session.get('upload_data', None)
@@ -376,12 +385,14 @@ def uploadAdd():
     return redirect(url_for('index'))
 
 @app.route('/api/upload/clear')
+@loginRequired
 def uploadClear():
     session.pop('upload_data', None)
     return redirect(url_for('index'))
 
 #clean
 @app.route('/api/cleanup')
+@loginRequired
 def cleanup():
 
     #gets rid of owners or

@@ -26,4 +26,4 @@ def parseXML(file):
 
     return assets
 
-print(parseXML('scan1.xml'))
+# print(parseXML('scan1.xml'))

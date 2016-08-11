@@ -46,7 +46,7 @@ $(document).ready(function() {
     $(".modal-body #AssetFormIp").val(data[4]);
     $(".modal-body #AssetFormMac").val(data[5]);
     $(".modal-body #AssetFormDateIssued").val(data[6]);
-    $(".modal-body #AssetFormDateRenewel").val(data[7]);
+    $(".modal-body #AssetFormDateRenewal").val(data[7]);
     $(".modal-body #AssetFormCondition").val(data[8]);
     $(".modal-body #AssetFormOwner").val(data[9]);
     $(".modal-body #AssetFormLocation").val(data[10]);

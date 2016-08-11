@@ -27,12 +27,15 @@
 
 from flask import Flask, render_template, url_for, request, redirect, session, abort, flash
 from oauth2client import client
+from werkzeug.utils import secure_filename
 from py2neo import Graph
 from uuid import uuid4
 import os
 import httplib2
 import apiclient
 import time
+
+from parseXML import parseXML
 
 #=============#
 # CONFIG VARS #
@@ -45,16 +48,26 @@ AUTH_REQUIRED = 2
 # MAIN #
 #======#
 
+#app init
 app = Flask(__name__)
 app.debug = True
-app.secret_key = str(os.urandom(32))
+app.secret_key = str(os.urandom(32)) #for sessions
+app.config['UPLOAD_FOLDER'] = '/uploads'
 
 #database connect
 graph = Graph(os.environ.get('GRAPHENEDB_URL', 'http://localhost:7474'),bolt=False)
 
+#set up filesystem for uploads
+UPLOAD_FOLDER = '/uploads'
+ALLOWED_EXTENSIONS = set(['xml'])
+
 #==================#
 # GLOBAL FUNCTIONS #
 #==================#
+
+def allowed_file(filename):
+    return '.' in filename and \
+    filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 #========#
 # ROUTES #
@@ -78,11 +91,14 @@ def index():
         if date_issued is not None:
             row['asset']['date_issued'] = time.strftime("%m/%d/%Y", time.gmtime(int(date_issued)))
             if (int(date_issued) - 1.21E6) < time.time():
-                flash('There are assets up for renewel')
+                flash_flag = True
 
         date_renewal = row['asset']['date_renewal']
         if date_renewal is not None:
             row['asset']['date_renewal'] = time.strftime("%m/%d/%Y", time.gmtime(int(date_renewal)))
+
+    if flash_flag:
+        flash('There are assets up for renewel')
 
     return render_template("index.html", title="Asset Data", data=data, username=username)
 
@@ -302,6 +318,67 @@ def renewals():
         row['asset']['date_renewal'] = time.strftime("%m/%d/%Y", time.gmtime(int(row['asset']['date_renewal'])))
 
     return render_template("index.html", title="New Renewals", data=data, username=username)
+
+@app.route('/api/upload', methods=['GET','POST'])
+def uploadFile():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit a empty part without filename
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+
+            data = parseXML(filename)
+            session['upload_data'] = data
+
+    return render_template("upload.html", data=data)
+
+@app.route('/api/upload/add')
+def uploadAdd():
+
+    data = session.get('upload_data', None)
+
+    for row in data:
+        uid = str(uuid4())
+
+        if 'mac' in row:
+            mac = row['mac']
+        else:
+            continue
+
+        statement = """
+                    MERGE (asset:Asset {uid:{uid}})
+                    SET asset.mac = {mac}
+
+                    MERGE (owner:Person {name:'unknown'})
+                    MERGE (owner)-[:OWNS]->(asset)
+                    """
+
+        if 'ip' in row:
+            ip = row['ipv4']
+        else:
+            ip = 'unknown'
+
+            statement += """
+                        MERGE (ip:Ip {address:{ip}})
+                        MERGE (asset)-[:HAS_IP]->(ip)
+                        """
+        graph.run(statement, uid=uid, mac=mac, ip=ip)
+
+    flash("File contents added to database.")
+
+    return redirect(url_for('index'))
+
+@app.route('/api/upload/clear')
+def uploadClear():
+    session.pop('upload_data', None)
+    return redirect(url_for('index'))
 
 #clean
 @app.route('/api/cleanup')

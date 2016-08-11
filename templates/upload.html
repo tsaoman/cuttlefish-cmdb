@@ -1,0 +1,61 @@
+<!--
+Cuttlefish CMDB
+Configuration Management Database leveraging Neo4j
+Copyright (C) 2016 Brandon Tsao
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published
+by the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+{% extends "layout.html" %}
+{% block title %} Upload {% endblock %}
+
+{% block head %}
+  {{ super() }}
+{% endblock %}
+
+{% block content %}
+
+<body class="body">
+  <div class="container">
+
+    <p>The following assets will be added to the database</p>
+
+    <table class="table table-hover" cellspacing="0" width="100%">
+
+      <thead>
+        <tr>
+          <th>MAC</th>
+          <th>IP</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        {% for row in data %}
+        <tr>
+          <td>{{ row['mac'] }}</td>
+          <td>{{ row['ipv4'] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <a class="btn btn-secondary" href="{{ url_for('uploadClear') }}" role="button">Cancel</a>
+    <a class="btn btn-primary" href="{{ url_for('uploadAdd') }}" role="button">Write to DB</a>
+
+  </div>
+
+</body>
+
+{% endblock %}

@@ -316,6 +316,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     </div>
   </div><!-- end modal -->
 
+  <!-- Upload File Modal -->
+  <div class="modal fade" id="uploadFileModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <h4 class="modal-title">File Upload</h4>
+        </div>
+        <div class="modal-body">
+          <form id="uploadFileForm" action="{{ url_for('uploadFile') }}" method="POST" enctype=multipart/form-data>
+            <input type=file name=file>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <input id="confirmUploadButton" form="uploadFileForm" class="btn btn-primary" type="submit" value="Upload">
+        </div>
+      </div>
+    </div>
+  </div><!-- end modal -->
+
 </body>
 
 {% endblock %}

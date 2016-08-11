@@ -329,6 +329,41 @@ def renewals():
 @loginRequired
 def uploadFile():
 
+    if 'upload_data' in session:
+
+        data = session.get('upload_data', None)
+
+        for row in data:
+            uid = str(uuid4())
+
+            if 'mac' in row:
+                mac = row['mac']
+            else:
+                continue
+
+            statement = """
+                        MERGE (asset:Asset {uid:{uid}})
+                        SET asset.mac = {mac}
+
+                        MERGE (owner:Person {name:'unknown'})
+                        MERGE (owner)-[:OWNS]->(asset)
+                        """
+
+            if 'ip' in row:
+                ip = row['ipv4']
+            else:
+                ip = 'unknown'
+
+                statement += """
+                            MERGE (ip:Ip {address:{ip}})
+                            MERGE (asset)-[:HAS_IP]->(ip)
+                            """
+            graph.run(statement, uid=uid, mac=mac, ip=ip)
+
+        flash("File contents added to database.")
+
+        return redirect(url_for('index'))
+
     if request.method == 'POST':
         if 'file' not in request.files:
             flash('No file part')
@@ -345,44 +380,9 @@ def uploadFile():
             data = parseXML(filename)
             session['upload_data'] = data
 
-    return render_template("upload.html", data=data, username=session['username'])
+        return render_template("upload.html", data=data, username=session['username'])
 
-@app.route('/api/upload/add')
-@loginRequired
-def uploadAdd():
-
-    data = session.get('upload_data', None)
-
-    for row in data:
-        uid = str(uuid4())
-
-        if 'mac' in row:
-            mac = row['mac']
-        else:
-            continue
-
-        statement = """
-                    MERGE (asset:Asset {uid:{uid}})
-                    SET asset.mac = {mac}
-
-                    MERGE (owner:Person {name:'unknown'})
-                    MERGE (owner)-[:OWNS]->(asset)
-                    """
-
-        if 'ip' in row:
-            ip = row['ipv4']
-        else:
-            ip = 'unknown'
-
-            statement += """
-                        MERGE (ip:Ip {address:{ip}})
-                        MERGE (asset)-[:HAS_IP]->(ip)
-                        """
-        graph.run(statement, uid=uid, mac=mac, ip=ip)
-
-    flash("File contents added to database.")
-
-    return redirect(url_for('index'))
+    return abort(400)
 
 @app.route('/api/upload/clear')
 @loginRequired

@@ -342,22 +342,22 @@ def uploadFile():
                 continue
 
             statement = """
-                        MERGE (asset:Asset {uid:{uid}})
+                        MERGE (asset:Asset)
                         SET asset.mac = {mac}
 
                         MERGE (owner:Person {name:'unknown'})
                         MERGE (owner)-[:OWNS]->(asset)
                         """
 
-            if 'ip' in row:
+            if 'ipv4' in row:
                 ip = row['ipv4']
             else:
                 ip = 'unknown'
 
-                statement += """
-                            MERGE (ip:Ip {address:{ip}})
-                            MERGE (asset)-[:HAS_IP]->(ip)
-                            """
+            statement += """
+                        MERGE (ip:Ip {address:{ip}})
+                        MERGE (asset)-[:HAS_IP]->(ip)
+                        """
             graph.run(statement, uid=uid, mac=mac, ip=ip)
 
         flash("File contents added to database.")

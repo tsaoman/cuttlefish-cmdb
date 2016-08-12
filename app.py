@@ -117,7 +117,7 @@ def index():
     if flash_flag:
         flash('There are assets up for renewel')
 
-    session['upload_data'] = data #make sure session upload data is clear
+    session.pop('upload_data', None) #make sure session upload data is clear
 
     return render_template("index.html", title="Asset Data", data=data, username=session['username'])
 
@@ -371,7 +371,7 @@ def uploadFile():
 
     if request.method == 'POST':
 
-        session['upload_data'] = data
+
 
         if 'file' not in request.files:
             flash('No file part')

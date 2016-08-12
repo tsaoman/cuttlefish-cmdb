@@ -89,9 +89,18 @@ def allowed_file(filename):
 @loginRequired
 def index():
 
+    constraint_statement = """
+                CREATE CONSTRAINT ON (asset:Asset) ASSERT asset.mac IS UNIQUE;
+                CREATE CONSTRAINT ON (ip:Ip) ASSERT ip.address IS UNIQUE;
+                CREATE CONSTRAINT ON (owner:Person) ASSERT owner.name IS UNIQUE
+                """
+
+    # graph.run(constraint_statement)
+
     data = graph.data("MATCH (owner:Person)-[:OWNS]->(asset:Asset)-[:HAS_IP]->(ip:Ip) RETURN asset, owner, ip, id(asset) AS iid")
 
     #convert POSIX time to user readable
+    flash_flag = 0 #alert user to renweable assets
     for row in data:
 
         date_issued = row['asset']['date_issued']
@@ -104,9 +113,11 @@ def index():
         if date_renewal is not None:
             row['asset']['date_renewal'] = time.strftime("%m/%d/%Y", time.gmtime(int(date_renewal)))
 
+
     if flash_flag:
         flash('There are assets up for renewel')
 
+    # return str(data)
     return render_template("index.html", title="Asset Data", data=data, username=session['username'])
 
 #auth routes
@@ -336,31 +347,24 @@ def uploadFile():
         for row in data:
             uid = str(uuid4())
 
-            if 'mac' in row:
-                mac = row['mac']
-            else:
-                continue
+            if 'mac' in row and 'ipv4' in row and row['mac']:
 
-            statement = """
-                        MERGE (asset:Asset)
-                        SET asset.mac = {mac}
+                statement = """
+                            CREATE (asset:Asset {mac:{mac}})
 
-                        MERGE (owner:Person {name:'unknown'})
-                        MERGE (owner)-[:OWNS]->(asset)
-                        """
+                            MERGE (owner:Person {name:'unknown'})
+                            MERGE (owner)-[:OWNS]->(asset)
 
-            if 'ipv4' in row:
-                ip = row['ipv4']
-            else:
-                ip = 'unknown'
-
-            statement += """
-                        MERGE (ip:Ip {address:{ip}})
-                        MERGE (asset)-[:HAS_IP]->(ip)
-                        """
-            graph.run(statement, uid=uid, mac=mac, ip=ip)
+                            MERGE (ip:Ip {address:{ip}})
+                            MERGE (asset)-[:HAS_IP]->(ip)
+                            """
+                try:
+                    graph.run(statement, uid=uid, mac=row['mac'], ip=row['ipv4'])
+                except:
+                    pass
 
         flash("File contents added to database.")
+        session.pop('upload_data', None) #clears upload data
 
         return redirect(url_for('index'))
 
@@ -369,15 +373,14 @@ def uploadFile():
             flash('No file part')
             return redirect(request.url)
         file = request.files['file']
-        # if user does not select file, browser also
-        # submit a empty part without filename
         if file.filename == '':
             flash('No selected file')
             return redirect(request.url)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
+            file.save(os.path.join('uploads', filename))
 
-            data = parseXML(filename)
+            data = parseXML(os.path.join('uploads',filename))
             session['upload_data'] = data
 
         return render_template("upload.html", data=data, username=session['username'])

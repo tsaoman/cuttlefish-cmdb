@@ -1,7 +1,8 @@
 #!/bin/bash -ex
 
 # run me from root's cron
-SCAN_DIR='/var/tmp/scans'
+# SCAN_DIR='/var/tmp/scans'
+SCAN_DIR="/Users/$USER/desktop"
 CMDB_URL='https://cephalapod.herokuapp.com'
 PATH=$PATH:/usr/sbin:/sbin:/usr/local/bin
 
@@ -23,7 +24,7 @@ agent_mac=`get_agent_mac`
 
 mkdir -p $SCAN_DIR
 if [ $# -eq 0 ]; then
-  report_filename="$SCAN_DIR/nmap-${target_network}_`date +%F-%T`.xml"
+  report_filename="$SCAN_DIR/nmap-${target_network}_`date +%Y-%m-%d_%H.%M.%S.`xml"
   nmap -O -sT -oX $report_filename $target_network/24
 else
   report_filename=$1

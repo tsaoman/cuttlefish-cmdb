@@ -383,6 +383,8 @@ def uploadFile():
             data = parseXML(os.path.join('uploads',filename))
             session['upload_data'] = data
 
+            os.remove(os.path.join('uploads',filename)) #deletes file aftre grabbing data
+
         return render_template("upload.html", data=data, username=session['username'])
 
     return abort(400)

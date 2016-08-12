@@ -66,15 +66,15 @@ ALLOWED_EXTENSIONS = set(['xml'])
 # GLOBAL FUNCTIONS #
 #==================#
 
-# def loginRequired(f):
-#     @wraps(f)
-#     def decorated_function(*args, **kwargs):
-#         if 'username' not in session:
-#             return redirect(url_for('login'))
-#
-#         return f(*args, **kwargs)
-#
-#     return decorated_function
+def loginRequired(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'username' not in session:
+            return redirect(url_for('login'))
+
+        return f(*args, **kwargs)
+
+    return decorated_function
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -86,11 +86,8 @@ def allowed_file(filename):
 
 #index
 @app.route('/')
-# loginRequired
+@loginRequired
 def index():
-
-    if 'username' not in session:
-        return redirect(url_for('login'))
 
     constraint_statement = """
                 CREATE CONSTRAINT ON (asset:Asset) ASSERT asset.mac IS UNIQUE;
@@ -182,11 +179,8 @@ def logout():
 
 #add new assets / items
 @app.route('/api/add/asset', methods=['POST'])
-# loginRequired
+@loginRequired
 def assetAdd():
-
-    if 'username' not in session:
-        return redirect(url_for('login'))
 
     uid = str(uuid4())#generate uid
 

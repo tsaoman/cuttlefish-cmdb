@@ -117,7 +117,8 @@ def index():
     if flash_flag:
         flash('There are assets up for renewel')
 
-    # return str(data)
+    session['upload_data'] = data #make sure session upload data is clear
+
     return render_template("index.html", title="Asset Data", data=data, username=session['username'])
 
 #auth routes
@@ -369,7 +370,7 @@ def uploadFile():
         return redirect(url_for('index'))
 
     if request.method == 'POST':
-        
+
         session['upload_data'] = data
 
         if 'file' not in request.files:

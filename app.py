@@ -66,15 +66,15 @@ ALLOWED_EXTENSIONS = set(['xml'])
 # GLOBAL FUNCTIONS #
 #==================#
 
-# def loginRequired(f):
-#     @wraps(f)
-#     def decorated_function(*args, **kwargs):
-#         if 'username' not in session:
-#             return redirect(url_for('login'))
-#
-#         return f(*args, **kwargs)
-#
-#     return decorated_function
+def loginRequired(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'username' not in session:
+            return redirect(url_for('login'))
+
+        return f(*args, **kwargs)
+
+    return decorated_function
 
 def allowed_file(filename):
     return '.' in filename and \

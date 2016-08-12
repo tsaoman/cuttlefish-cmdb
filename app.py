@@ -385,7 +385,6 @@ def uploadFile():
             file.save(os.path.join('uploads', filename))
 
             data = parseXML(os.path.join('uploads',filename))
-            flash(str(data))
             session['upload_data'] = data
 
             os.remove(os.path.join('uploads',filename)) #deletes file aftre grabbing data

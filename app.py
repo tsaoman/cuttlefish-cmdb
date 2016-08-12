@@ -52,7 +52,7 @@ AUTH_REQUIRED = 2
 #app init
 app = Flask(__name__)
 app.debug = True
-app.secret_key = str(os.urandom(32)) #for sessions
+app.secret_key = os.environ('APP_SECRET') #for sessions
 app.config['UPLOAD_FOLDER'] = '/uploads'
 
 #database connect

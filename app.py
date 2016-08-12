@@ -369,6 +369,9 @@ def uploadFile():
         return redirect(url_for('index'))
 
     if request.method == 'POST':
+        
+        session['upload_data'] = data
+
         if 'file' not in request.files:
             flash('No file part')
             return redirect(request.url)

@@ -102,7 +102,7 @@ def index():
     data = graph.data("MATCH (owner:Person)-[:OWNS]->(asset:Asset)-[:HAS_IP]->(ip:Ip) RETURN asset, owner, ip, id(asset) AS iid")
 
     #convert POSIX time to user readable
-    flash_flag = 0 #alert user to renweable assets
+    flash_flag = 0 #alert user to renewable assets
     for row in data:
 
         date_issued = row['asset']['date_issued']
@@ -117,7 +117,7 @@ def index():
 
 
     if flash_flag:
-        flash('There are assets up for renewel')
+        flash('There are assets due for renewal')
 
     session.pop('upload_data', None) #make sure session upload data is clear
 
@@ -394,7 +394,7 @@ def uploadFile():
             data = parseXML(os.path.join('uploads',filename))
             session['upload_data'] = data
 
-            os.remove(os.path.join('uploads',filename)) #deletes file aftre grabbing data
+            os.remove(os.path.join('uploads',filename))
 
         return render_template("upload.html", data=data, username=session['username'])
 

@@ -324,7 +324,6 @@ def assetDeleteByUID(uid):
 
 @app.route('/renewals')
 @loginRequired
-
 def renewals():
 
     statement = """

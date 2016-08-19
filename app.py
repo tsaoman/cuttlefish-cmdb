@@ -56,7 +56,8 @@ app.secret_key = os.environ['APP_SECRET'] #for sessions
 app.config['UPLOAD_FOLDER'] = '/uploads'
 
 #database connect
-graph = Graph(os.environ.get('GRAPHENEDB_URL', 'http://localhost:7474'),bolt=False)
+DEFAULT_NEO_URL = 'http://neo4j:secret@localhost:7474'
+graph = Graph(os.environ.get('GRAPHENEDB_URL', DEFAULT_NEO_URL), bolt=False)
 
 #set up filesystem for uploads
 UPLOAD_FOLDER = '/uploads'
@@ -69,8 +70,9 @@ ALLOWED_EXTENSIONS = set(['xml'])
 def loginRequired(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'username' not in session:
-            return redirect(url_for('login'))
+        if 'CLIENT_ID' in os.environ:
+            if 'username' not in session:
+                return redirect(url_for('login'))
 
         return f(*args, **kwargs)
 
@@ -119,7 +121,12 @@ def index():
 
     session.pop('upload_data', None) #make sure session upload data is clear
 
-    return render_template("index.html", title="Asset Data", data=data, username=session['username'])
+    return render_template("index.html", title="Asset Data", data=data, username=get_username())
+
+
+def get_username():
+    return session['username'] if 'username' in session else 'Local User'
+
 
 #auth routes
 

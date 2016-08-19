@@ -50,6 +50,7 @@ graph = Graph(os.environ.get('GRAPHENEDB_URL', DEFAULT_NEO_URL), bolt=False)
 
 UPLOAD_FOLDER = '/uploads'
 ALLOWED_EXTENSIONS = set(['xml'])
+TWO_WEEKS = 1209600
 
 
 def loginRequired(f):
@@ -81,29 +82,29 @@ def create_indexes():
 @app.route('/')
 @loginRequired
 def index():
-    data = graph.data(
+    assets = graph.data(
         "MATCH (owner:Person)-[:OWNS]->(asset:Asset)-[:HAS_IP]->(ip:Ip) RETURN asset, owner, ip, id(asset) AS iid")
 
     # convert POSIX time to user readable
-    flash_flag = 0  # alert user to renewable assets
-    for row in data:
-
-        date_issued = row['asset']['date_issued']
+    outdated_assets = 0  # alert user to renewable assets
+    for row in assets:
+        asset = row['asset']
+        date_issued = asset['date_issued']
         if date_issued is not None:
-            row['asset']['date_issued'] = time.strftime("%m/%d/%Y", time.gmtime(int(date_issued)))
-            if (int(date_issued) - 1.21E6) < time.time():
-                flash_flag = True
+            asset['date_issued'] = time.strftime("%m/%d/%Y", time.gmtime(int(date_issued)))
 
-        date_renewal = row['asset']['date_renewal']
+        date_renewal = asset['date_renewal']
         if date_renewal is not None:
-            row['asset']['date_renewal'] = time.strftime("%m/%d/%Y", time.gmtime(int(date_renewal)))
+            asset['date_renewal'] = time.strftime("%m/%d/%Y", time.gmtime(int(date_renewal)))
+            if (int(date_renewal) - TWO_WEEKS) < time.time():
+                outdated_assets += 1
 
-    if flash_flag:
-        flash('There are assets due for renewal')
+    if outdated_assets:
+        flash('There are {} assets due for renewal'.format(outdated_assets))
 
     session.pop('upload_data', None)  # make sure session upload data is clear
 
-    return render_template("index.html", title="Asset Data", data=data, username=get_username())
+    return render_template("index.html", title="Asset Data", data=assets, username=get_username())
 
 
 def get_username():

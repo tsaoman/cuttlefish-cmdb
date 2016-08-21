@@ -1,9 +1,9 @@
 # Cuttlefish CMDB
 # Configuration Management Database leveraging Neo4j
 
-#=======#
+# =======#
 # LEGAL #
-#=======#
+# =======#
 
 # Copyright (C) 2016 Brandon Tsao
 #
@@ -21,107 +21,95 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#=========#
+# =========#
 # MODULES #
-#=========#
+# =========#
 
+import time
+from functools import wraps
+from uuid import uuid4
+
+import apiclient
+import httplib2
+import os
 from flask import Flask, render_template, url_for, request, redirect, session, abort, flash
 from oauth2client import client
-from werkzeug.utils import secure_filename
-from functools import wraps
-from py2neo import Graph
-from uuid import uuid4
-import os
-import httplib2
-import apiclient
-import time
-
 from parseXML import parseXML
-
-#=============#
-# CONFIG VARS #
-#=============#
+from py2neo import Graph
+from werkzeug.utils import secure_filename
 
 AUTH_REQUIRED = 2
-# RESTRICTED_DOMAIN = 'neotechnology.com'
 
-#======#
-# MAIN #
-#======#
-
-#app init
 app = Flask(__name__)
 app.debug = True
-app.secret_key = os.environ['APP_SECRET'] #for sessions
+app.secret_key = os.environ['APP_SECRET']  # for sessions
 app.config['UPLOAD_FOLDER'] = '/uploads'
 
-#database connect
-graph = Graph(os.environ.get('GRAPHENEDB_URL', 'http://localhost:7474'),bolt=False)
+DEFAULT_NEO_URL = 'http://neo4j:secret@localhost:7474'
+graph = Graph(os.environ.get('GRAPHENEDB_URL', DEFAULT_NEO_URL), bolt=False)
 
-#set up filesystem for uploads
 UPLOAD_FOLDER = '/uploads'
 ALLOWED_EXTENSIONS = set(['xml'])
+TWO_WEEKS = 1209600
 
-#==================#
-# GLOBAL FUNCTIONS #
-#==================#
 
 def loginRequired(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'username' not in session:
-            return redirect(url_for('login'))
+        if 'CLIENT_ID' in os.environ:
+            if 'username' not in session:
+                return redirect(url_for('login'))
 
         return f(*args, **kwargs)
 
     return decorated_function
 
+
 def allowed_file(filename):
     return '.' in filename and \
-    filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+           filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
-#========#
-# ROUTES #
-#========#
 
-#index
-@app.route('/')
-@loginRequired
-def index():
-
+def create_indexes():
     constraint_statement = """
                 CREATE CONSTRAINT ON (asset:Asset) ASSERT asset.mac IS UNIQUE;
                 CREATE CONSTRAINT ON (ip:Ip) ASSERT ip.address IS UNIQUE;
                 CREATE CONSTRAINT ON (owner:Person) ASSERT owner.name IS UNIQUE
                 """
+    graph.run(constraint_statement)
 
-    # graph.run(constraint_statement)
 
-    data = graph.data("MATCH (owner:Person)-[:OWNS]->(asset:Asset)-[:HAS_IP]->(ip:Ip) RETURN asset, owner, ip, id(asset) AS iid")
+@app.route('/')
+@loginRequired
+def index():
+    assets = graph.data(
+        "MATCH (owner:Person)-[:OWNS]->(asset:Asset)-[:HAS_IP]->(ip:Ip) RETURN asset, owner, ip, id(asset) AS iid")
 
-    #convert POSIX time to user readable
-    flash_flag = 0 #alert user to renweable assets
-    for row in data:
-
-        date_issued = row['asset']['date_issued']
+    # convert POSIX time to user readable
+    outdated_assets = 0  # alert user to renewable assets
+    for row in assets:
+        asset = row['asset']
+        date_issued = asset['date_issued']
         if date_issued is not None:
-            row['asset']['date_issued'] = time.strftime("%m/%d/%Y", time.gmtime(int(date_issued)))
-            if (int(date_issued) - 1.21E6) < time.time():
-                flash_flag = True
+            asset['date_issued'] = time.strftime("%m/%d/%Y", time.gmtime(int(date_issued)))
 
-        date_renewal = row['asset']['date_renewal']
+        date_renewal = asset['date_renewal']
         if date_renewal is not None:
-            row['asset']['date_renewal'] = time.strftime("%m/%d/%Y", time.gmtime(int(date_renewal)))
+            asset['date_renewal'] = time.strftime("%m/%d/%Y", time.gmtime(int(date_renewal)))
+            if (int(date_renewal) - TWO_WEEKS) < time.time():
+                outdated_assets += 1
+
+    if outdated_assets:
+        flash('There are {} assets due for renewal'.format(outdated_assets))
+
+    session.pop('upload_data', None)  # make sure session upload data is clear
+
+    return render_template("index.html", title="Asset Data", data=assets, username=get_username())
 
 
-    if flash_flag:
-        flash('There are assets up for renewel')
+def get_username():
+    return session['username'] if 'username' in session else 'Local User'
 
-    session.pop('upload_data', None) #make sure session upload data is clear
-
-    return render_template("index.html", title="Asset Data", data=data, username=session['username'])
-
-#auth routes
 
 @app.route('/login')
 def login():
@@ -135,7 +123,7 @@ def login():
     else:
         http_auth = credentials.authorize(httplib2.Http())
 
-        plus_service = apiclient.discovery.build('plus','v1',http=http_auth)
+        plus_service = apiclient.discovery.build('plus', 'v1', http=http_auth)
         profile = plus_service.people().get(userId='me').execute()
 
         if 'domain' in profile and profile['domain'] == os.environ['RESTRICTED_DOMAIN']:
@@ -147,16 +135,16 @@ def login():
         else:
             return abort(401)
 
-@app.route('/oauth2callback',methods=['GET','POST'])
-def oauth2callback():
 
+@app.route('/oauth2callback', methods=['GET', 'POST'])
+def oauth2callback():
     flow = client.OAuth2WebServerFlow(
         os.environ['CLIENT_ID'],
         os.environ['CLIENT_SECRET'],
-        scope = 'https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.profile.emails.read',
+        scope='https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.profile.emails.read',
         redirect_uri=os.environ['REDIRECT_URI'],
         token_uri=os.environ['TOKEN_URI'],
-        auth_provider_x509_cert_url = os.environ['AUTH_PROVIDER_X509_CERT_URL']
+        auth_provider_x509_cert_url=os.environ['AUTH_PROVIDER_X509_CERT_URL']
     )
 
     if 'code' not in request.args:
@@ -169,22 +157,20 @@ def oauth2callback():
         session['credentials'] = credentials.to_json()
         return redirect(url_for('login'))
 
+
 @app.route('/logout')
 def logout():
-    session.pop('username',None)
-    session.pop('email',None)
+    session.pop('username', None)
+    session.pop('email', None)
     return redirect(url_for('index'))
 
-#asset CRUD
 
-#add new assets / items
 @app.route('/api/add/asset', methods=['POST'])
 @loginRequired
 def assetAdd():
+    uid = str(uuid4())  # generate uid
 
-    uid = str(uuid4())#generate uid
-
-    #localaize data
+    # localaize data
     model = request.form['model']
     make = request.form['make']
     serial = request.form['serial']
@@ -219,28 +205,28 @@ def assetAdd():
                 """
 
     graph.run(statement,
-                uid=uid,
-                model=model,
-                make=make,
-                serial=serial,
-                ip=ip,
-                mac=mac,
-                date_issued=int(time.mktime(time.strptime(date_issued,'%m/%d/%Y'))),
-                date_renewal=int(time.mktime(time.strptime(date_renewal,'%m/%d/%Y'))),
-                condition=condition,
-                location=location,
-                owner=owner,
-                notes=notes)
+              uid=uid,
+              model=model,
+              make=make,
+              serial=serial,
+              ip=ip,
+              mac=mac,
+              date_issued=int(time.mktime(time.strptime(date_issued, '%m/%d/%Y'))),
+              date_renewal=int(time.mktime(time.strptime(date_renewal, '%m/%d/%Y'))),
+              condition=condition,
+              location=location,
+              owner=owner,
+              notes=notes)
 
     return redirect("/")
 
-#UPDATE
+
+# UPDATE
 
 @app.route('/api/update/asset/', methods=['POST'])
 @loginRequired
 def assetUpdate():
-
-    #locallize data
+    # locallize data
     uid = request.form['uid']
     model = request.form['model']
     make = request.form['make']
@@ -290,42 +276,40 @@ def assetUpdate():
                 """
 
     graph.run(statement,
-                uid=uid,
-                model=model,
-                make=make,
-                serial=serial,
-                ip=ip,
-                mac=mac,
-                date_issued=int(time.mktime(time.strptime(date_issued,'%m/%d/%Y'))),
-                date_renewal=int(time.mktime(time.strptime(date_renewal,'%m/%d/%Y'))),
-                condition=condition,
-                owner=owner,
-                location=location,
-                notes=notes)
+              uid=uid,
+              model=model,
+              make=make,
+              serial=serial,
+              ip=ip,
+              mac=mac,
+              date_issued=int(time.mktime(time.strptime(date_issued, '%m/%d/%Y'))),
+              date_renewal=int(time.mktime(time.strptime(date_renewal, '%m/%d/%Y'))),
+              condition=condition,
+              owner=owner,
+              location=location,
+              notes=notes)
 
     return redirect(url_for('index'))
 
-#delete
-@app.route('/api/delete/asset/<uid>',methods=['GET'])
+
+@app.route('/api/delete/asset/<uid>', methods=['GET'])
 @loginRequired
 def assetDeleteByUID(uid):
-
     statement = "MATCH (asset:Asset {uid:{uid}}) DETACH DELETE asset"
     graph.run(statement, uid=uid)
 
     return redirect("/")
 
+
 @app.route('/renewals')
 @loginRequired
-
 def renewals():
-
     statement = """
                 MATCH (owner:Person)-[:OWNS]->(asset:Asset)-[:HAS_IP]->(ip:Ip)
                 WHERE (asset.date_renewal - 121000000.0) < (timestamp() / 1000.0)
                 RETURN asset, owner, ip, id(asset) AS iid
                 """
-    #1.21E6 = 2 weeks
+    # 1.21E6 = 2 weeks
     try:
         data = graph.data(statement)
     except ValueError:
@@ -337,10 +321,10 @@ def renewals():
 
     return render_template("index.html", title="New Renewals", data=data, username=session['username'])
 
-@app.route('/api/upload', methods=['GET','POST'])
+
+@app.route('/api/upload', methods=['GET', 'POST'])
 @loginRequired
 def uploadFile():
-
     if 'upload_data' in session:
 
         data = session.get('upload_data', None)
@@ -365,13 +349,11 @@ def uploadFile():
                     pass
 
         flash("File contents added to database.")
-        session.pop('upload_data', None) #clears upload data
+        session.pop('upload_data', None)  # clears upload data
 
         return redirect(url_for('index'))
 
     if request.method == 'POST':
-
-
 
         if 'file' not in request.files:
             flash('No file part')
@@ -384,14 +366,15 @@ def uploadFile():
             filename = secure_filename(file.filename)
             file.save(os.path.join('uploads', filename))
 
-            data = parseXML(os.path.join('uploads',filename))
+            data = parseXML(os.path.join('uploads', filename))
             session['upload_data'] = data
 
-            os.remove(os.path.join('uploads',filename)) #deletes file aftre grabbing data
+            os.remove(os.path.join('uploads', filename))
 
         return render_template("upload.html", data=data, username=session['username'])
 
     return abort(400)
+
 
 @app.route('/api/upload/clear')
 @loginRequired
@@ -399,12 +382,11 @@ def uploadClear():
     session.pop('upload_data', None)
     return redirect(url_for('index'))
 
-#clean
+
 @app.route('/api/cleanup')
 @loginRequired
 def cleanup():
-
-    #gets rid of owners or
+    # gets rid of owners or
     statement = """
                 MATCH (a:Owner)
                 WHERE size((a)--()) = 0
@@ -419,10 +401,8 @@ def cleanup():
 
     return redirect(url_for('index'))
 
-#=====#
-# RUN #
-#=====#
 
 if __name__ == "__main__":
-    #app.run(host='0.0.0.0', port=(int(os.environ.get('PORT', 33507))))
+    # app.run(host='0.0.0.0', port=(int(os.environ.get('PORT', 33507))))
+    create_indexes()
     app.run()

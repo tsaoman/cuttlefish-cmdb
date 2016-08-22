@@ -51,6 +51,7 @@ $(document).ready(function() {
     $(".modal-body #AssetFormOwner").val(data[9]);
     $(".modal-body #AssetFormLocation").val(data[10]);
     $(".modal-body #AssetFormNotes").val(data[11]);
+    $(".modal-body #AssetFormState").val(data[12]);
 
 
     //open confirm delete modal and pass data

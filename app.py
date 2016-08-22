@@ -82,29 +82,36 @@ def create_indexes():
 @app.route('/')
 @loginRequired
 def index():
-    assets = graph.data(
-        "MATCH (owner:Person)-[:OWNS]->(asset:Asset)-[:HAS_IP]->(ip:Ip) RETURN asset, owner, ip, id(asset) AS iid")
 
-    # convert POSIX time to user readable
-    outdated_assets = 0  # alert user to renewable assets
+
+    assets = graph.data(
+        """MATCH (asset:Asset)
+        OPTIONAL MATCH (asset)-[:HAS_IP]->(ip:Ip)
+        OPTIONAL MATCH (owner:Person)-[:OWNS]->(asset)
+        RETURN asset, owner, ip, id(asset) AS iid""")
+
     for row in assets:
         asset = row['asset']
         date_issued = asset['date_issued']
         if date_issued is not None:
-            asset['date_issued'] = time.strftime("%m/%d/%Y", time.gmtime(int(date_issued)))
-
+            asset['date_issued'] = get_local_date(date_issued)
+    #
         date_renewal = asset['date_renewal']
         if date_renewal is not None:
-            asset['date_renewal'] = time.strftime("%m/%d/%Y", time.gmtime(int(date_renewal)))
-            if (int(date_renewal) - TWO_WEEKS) < time.time():
-                outdated_assets += 1
+            asset['date_renewal'] = get_local_date(date_renewal)
 
-    if outdated_assets:
+    renewals = get_renewals()
+    outdated_assets = len(renewals)
+    if outdated_assets > 0 :
         flash('There are {} assets due for renewal'.format(outdated_assets))
 
     session.pop('upload_data', None)  # make sure session upload data is clear
 
     return render_template("index.html", title="Asset Data", data=assets, username=get_username())
+
+
+def get_local_date(epoch_date):
+    return time.strftime("%m/%d/%Y", time.gmtime(int(epoch_date)))
 
 
 def get_username():
@@ -168,21 +175,6 @@ def logout():
 @app.route('/api/add/asset', methods=['POST'])
 @loginRequired
 def assetAdd():
-    uid = str(uuid4())  # generate uid
-
-    # localaize data
-    model = request.form['model']
-    make = request.form['make']
-    serial = request.form['serial']
-    ip = request.form['ip']
-    mac = request.form['mac']
-    date_issued = request.form['date_issued']
-    date_renewal = request.form['date_renewal']
-    condition = request.form['condition']
-    owner = request.form['owner']
-    location = request.form['location']
-    notes = request.form['notes']
-
     statement = """
                 MERGE (asset:Asset {
                     uid:{uid},
@@ -194,29 +186,29 @@ def assetAdd():
                     date_renewal:{date_renewal},
                     condition:{condition},
                     location:{location},
-                    notes:{notes}
+                    notes:{notes},
+                    state:{state}
                     })
-
                 MERGE (ip:Ip {address:{ip}})
-                MERGE (asset)-[:HAS_IP]->(ip)
+                MERGE    (asset)-[:HAS_IP]->(ip)
+                MERGE    (owner:Person {name:{owner}})
+                MERGE    (owner)-[:OWNS]->(asset)"""
 
-                MERGE (owner:Person {name:{owner}})
-                MERGE (owner)-[:OWNS]->(asset)
-                """
-
+    form = request.form
     graph.run(statement,
-              uid=uid,
-              model=model,
-              make=make,
-              serial=serial,
-              ip=ip,
-              mac=mac,
-              date_issued=int(time.mktime(time.strptime(date_issued, '%m/%d/%Y'))),
-              date_renewal=int(time.mktime(time.strptime(date_renewal, '%m/%d/%Y'))),
-              condition=condition,
-              location=location,
-              owner=owner,
-              notes=notes)
+              uid=(str(uuid4())),
+              model=(form['model']),
+              make=(form['make']),
+              serial=(form['serial']),
+              ip=(form['ip']),
+              mac=(form['mac']),
+              date_issued=int(time.mktime(time.strptime(form['date_issued'], '%m/%d/%Y'))),
+              date_renewal=int(time.mktime(time.strptime(form['date_renewal'], '%m/%d/%Y'))),
+              condition=(form['condition']),
+              location=(form['location']),
+              owner=(form['owner']),
+              notes=(form['notes']),
+              state=form['state'])
 
     return redirect("/")
 
@@ -226,20 +218,7 @@ def assetAdd():
 @app.route('/api/update/asset/', methods=['POST'])
 @loginRequired
 def assetUpdate():
-    # locallize data
-    uid = request.form['uid']
-    model = request.form['model']
-    make = request.form['make']
-    serial = request.form['serial']
-    ip = request.form['ip']
-    mac = request.form['mac']
-    date_issued = request.form['date_issued']
-    date_renewal = request.form['date_renewal']
-    condition = request.form['condition']
-    owner = request.form['owner']
-    location = request.form['location']
-    notes = request.form['notes']
-
+    form = request.form
     statement = """
                 MATCH (asset:Asset {uid:{uid}})
 
@@ -253,6 +232,7 @@ def assetUpdate():
                 SET asset.condition={condition}
                 SET asset.location={location}
                 SET asset.notes={notes}
+                SET asset.state={state}
 
                 MERGE (ip:Ip {address:{ip}})
                 WITH asset, ip
@@ -276,18 +256,19 @@ def assetUpdate():
                 """
 
     graph.run(statement,
-              uid=uid,
-              model=model,
-              make=make,
-              serial=serial,
-              ip=ip,
-              mac=mac,
-              date_issued=int(time.mktime(time.strptime(date_issued, '%m/%d/%Y'))),
-              date_renewal=int(time.mktime(time.strptime(date_renewal, '%m/%d/%Y'))),
-              condition=condition,
-              owner=owner,
-              location=location,
-              notes=notes)
+              uid=(form['uid']),
+              model=(form['model']),
+              make=(form['make']),
+              serial=(form['serial']),
+              ip=(form['ip']),
+              mac=(form['mac']),
+              date_issued=int(time.mktime(time.strptime(form['date_issued'], '%m/%d/%Y'))),
+              date_renewal=int(time.mktime(time.strptime(form['date_renewal'], '%m/%d/%Y'))),
+              condition=(form['condition']),
+              owner=(form['owner']),
+              location=(form['location']),
+              notes=(form['notes']),
+              state=(form['state']))
 
     return redirect(url_for('index'))
 
@@ -304,22 +285,31 @@ def assetDeleteByUID(uid):
 @app.route('/renewals')
 @loginRequired
 def renewals():
+    data = get_renewals()
+
+    for row in data:
+        issued_ = int(row['asset']['date_issued'])
+        renewal_ = int(row['asset']['date_renewal'])
+        row['asset']['date_issued'] = get_local_date(issued_)
+        row['asset']['date_renewal'] = get_local_date(renewal_)
+
+    return render_template("index.html", title="New Renewals", data=data, username=get_username())
+
+
+def get_renewals():
     statement = """
-                MATCH (owner:Person)-[:OWNS]->(asset:Asset)-[:HAS_IP]->(ip:Ip)
-                WHERE (asset.date_renewal - 121000000.0) < (timestamp() / 1000.0)
+                MATCH (asset:Asset)
+                WHERE (asset.date_renewal - 121000000.0) < (timestamp() / 1000.0) and asset.state = 'ASSIGNED'
+                WITH asset
+                OPTIONAL MATCH (asset)-[:HAS_IP]->(ip:Ip)
+                OPTIONAL MATCH (owner:Person)-[:OWNS]->(asset)
                 RETURN asset, owner, ip, id(asset) AS iid
                 """
-    # 1.21E6 = 2 weeks
     try:
         data = graph.data(statement)
     except ValueError:
         pass
-
-    for row in data:
-        row['asset']['date_issued'] = time.strftime("%m/%d/%Y", time.gmtime(int(row['asset']['date_issued'])))
-        row['asset']['date_renewal'] = time.strftime("%m/%d/%Y", time.gmtime(int(row['asset']['date_renewal'])))
-
-    return render_template("index.html", title="New Renewals", data=data, username=session['username'])
+    return data
 
 
 @app.route('/api/upload', methods=['GET', 'POST'])
@@ -371,7 +361,7 @@ def uploadFile():
 
             os.remove(os.path.join('uploads', filename))
 
-        return render_template("upload.html", data=data, username=session['username'])
+        return render_template("upload.html", data=data, username=get_username())
 
     return abort(400)
 

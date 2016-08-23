@@ -333,11 +333,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <h4 class="modal-title">Are you sure?</h4>
             </div>
             <div class="modal-body">
-                It's usually good practice to keep assests for recordkeeping, even if they are removed from the network.<br/>
+                It's usually good practice to keep assets for record keeping, even if they are removed from the network.<br/>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <a id="confirmDeleteButton" class="btn btn-danger" role="button" href="#">I am a bad person; confirm
+                <a id="confirmDeleteButton" class="btn btn-danger" role="button" href="#">I know; confirm
                     delete</a>
             </div>
         </div>
@@ -355,8 +355,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <h4 class="modal-title">File Upload</h4>
             </div>
             <div class="modal-body">
-                <p>You file contents will be scanned for relevant data. You will be given the oppourtinity to review the
-                    data before it is commited to the databse.</p>
+                <p>Your file contents will be scanned for relevant data. You will be given the opportunity to review the
+                    data before it is committed to the database.</p>
                 <form id="uploadFileForm" action="{{ url_for('uploadFile') }}" method="POST"
                       enctype=multipart/form-data>
                     <input type=file name=file>

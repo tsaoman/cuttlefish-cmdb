@@ -91,7 +91,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             </div>
             <div class="modal-body">
 
-                <form id="assetAddForm" method="POST" action="{{ url_for('assetAdd') }}">
+                <form id="assetAddForm" method="POST" action="{{ url_for('add_asset') }}">
 
                     <div class="form-group row">
                         <label for="uid" class="col-sm-4 form-control-label">UID</label>
@@ -138,8 +138,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
                     <div class="form-group row">
                         <label for="date_issued" class="col-sm-4 form-control-label">Date Issued:</label>
-                        <div class="col-sm-8">
+                        <div class="col-sm-8 date">
                             <input data-provide="datepicker" type='text' class="form-control" name="date_issued"
+                                   data-date-format="dd/mm/yyyy"
+                                   data-date-todaybutton="true"
+                                   required
                                    placeholder="Date Issued">
                         </div>
                     </div>
@@ -148,6 +151,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         <label for="date_renewal" class="col-sm-4 form-control-label">Date of Renewal:</label>
                         <div class="col-sm-8">
                             <input data-provide="datepicker" type="text" class="form-control" name="date_renewal"
+                                   data-date-format="dd/mm/yyyy"
+                                   required
                                    placeholder="Date of renewal">
                         </div>
                     </div>
@@ -206,7 +211,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             </div>
 
             <div class="modal-body">
-                <form id="assetUpdateForm" method="POST" action="{{ url_for('assetUpdate') }}">
+                <form id="assetUpdateForm" method="POST" action="{{ url_for('update_asset') }}">
 
                     <div class="form-group row">
                         <label for="uid" class="col-sm-4 form-control-label">UID</label>

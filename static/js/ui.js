@@ -53,7 +53,6 @@ $(document).ready(function() {
     $(".modal-body #AssetFormNotes").val(data[11]);
     $(".modal-body #AssetFormState").val(data[12]);
 
-
     //open confirm delete modal and pass data
     $('#assetDeleteButton').on('click', function () {
       modal.modal('hide');
@@ -68,6 +67,3 @@ $(document).ready(function() {
   }); //end inspect modal open
 
 });
-
-//datepicker
-$('.datepicker').datepicker();

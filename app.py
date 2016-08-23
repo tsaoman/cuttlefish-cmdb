@@ -38,6 +38,8 @@ from parseXML import parseXML
 from py2neo import Graph
 from werkzeug.utils import secure_filename
 
+DATE_FORMAT = '%d/%m/%Y'
+
 AUTH_REQUIRED = 2
 
 app = Flask(__name__)
@@ -49,11 +51,11 @@ DEFAULT_NEO_URL = 'http://neo4j:secret@localhost:7474'
 graph = Graph(os.environ.get('GRAPHENEDB_URL', DEFAULT_NEO_URL), bolt=False)
 
 UPLOAD_FOLDER = '/uploads'
-ALLOWED_EXTENSIONS = set(['xml'])
+ALLOWED_EXTENSIONS = {'xml'}
 TWO_WEEKS = 1209600
 
 
-def loginRequired(f):
+def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'CLIENT_ID' in os.environ:
@@ -81,10 +83,8 @@ def create_indexes():
 
 
 @app.route('/')
-@loginRequired
+@login_required
 def index():
-
-
     assets = graph.data(
         """MATCH (asset:Asset)
         OPTIONAL MATCH (asset)-[:HAS_IP]->(ip:Ip)
@@ -96,14 +96,14 @@ def index():
         date_issued = asset['date_issued']
         if date_issued is not None:
             asset['date_issued'] = get_local_date(date_issued)
-    #
+
         date_renewal = asset['date_renewal']
         if date_renewal is not None:
             asset['date_renewal'] = get_local_date(date_renewal)
 
     renewals = get_renewals()
     outdated_assets = len(renewals)
-    if outdated_assets > 0 :
+    if outdated_assets > 0:
         flash('There are {} assets due for renewal'.format(outdated_assets))
 
     session.pop('upload_data', None)  # make sure session upload data is clear
@@ -112,11 +112,15 @@ def index():
 
 
 def get_local_date(epoch_date):
-    return time.strftime("%m/%d/%Y", time.gmtime(int(epoch_date)))
+    return time.strftime(DATE_FORMAT, time.gmtime(int(epoch_date)))
 
 
 def get_username():
     return session['username'] if 'username' in session else 'Local User'
+
+
+def parse_time(string):
+    return int(time.mktime(time.strptime(string, DATE_FORMAT)))
 
 
 @app.route('/login')
@@ -174,8 +178,8 @@ def logout():
 
 
 @app.route('/api/add/asset', methods=['POST'])
-@loginRequired
-def assetAdd():
+@login_required
+def add_asset():
     statement = """
                 MERGE (asset:Asset {
                     uid:{uid},
@@ -203,8 +207,8 @@ def assetAdd():
               serial=(form['serial']),
               ip=(form['ip']),
               mac=(form['mac']),
-              date_issued=int(time.mktime(time.strptime(form['date_issued'], '%m/%d/%Y'))),
-              date_renewal=int(time.mktime(time.strptime(form['date_renewal'], '%m/%d/%Y'))),
+              date_issued=parse_time(form['date_issued']),
+              date_renewal=parse_time(form['date_renewal']),
               condition=(form['condition']),
               location=(form['location']),
               owner=(form['owner']),
@@ -217,8 +221,8 @@ def assetAdd():
 # UPDATE
 
 @app.route('/api/update/asset/', methods=['POST'])
-@loginRequired
-def assetUpdate():
+@login_required
+def update_asset():
     form = request.form
     statement = """
                 MATCH (asset:Asset {uid:{uid}})
@@ -263,8 +267,8 @@ def assetUpdate():
               serial=(form['serial']),
               ip=(form['ip']),
               mac=(form['mac']),
-              date_issued=int(time.mktime(time.strptime(form['date_issued'], '%m/%d/%Y'))),
-              date_renewal=int(time.mktime(time.strptime(form['date_renewal'], '%m/%d/%Y'))),
+              date_issued=parse_time(form['date_issued']),
+              date_renewal=parse_time(form['date_renewal']),
               condition=(form['condition']),
               owner=(form['owner']),
               location=(form['location']),
@@ -275,7 +279,7 @@ def assetUpdate():
 
 
 @app.route('/api/delete/asset/<uid>', methods=['GET'])
-@loginRequired
+@login_required
 def assetDeleteByUID(uid):
     statement = "MATCH (asset:Asset {uid:{uid}}) DETACH DELETE asset"
     graph.run(statement, uid=uid)
@@ -284,7 +288,7 @@ def assetDeleteByUID(uid):
 
 
 @app.route('/renewals')
-@loginRequired
+@login_required
 def renewals():
     data = get_renewals()
 
@@ -314,7 +318,7 @@ def get_renewals():
 
 
 @app.route('/api/upload', methods=['GET', 'POST'])
-@loginRequired
+@login_required
 def uploadFile():
     if 'upload_data' in session:
 
@@ -368,14 +372,14 @@ def uploadFile():
 
 
 @app.route('/api/upload/clear')
-@loginRequired
+@login_required
 def uploadClear():
     session.pop('upload_data', None)
     return redirect(url_for('index'))
 
 
 @app.route('/api/cleanup')
-@loginRequired
+@login_required
 def cleanup():
     # gets rid of owners or
     statement = """

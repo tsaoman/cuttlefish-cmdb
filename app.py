@@ -71,12 +71,13 @@ def allowed_file(filename):
 
 
 def create_indexes():
-    constraint_statement = """
-                CREATE CONSTRAINT ON (asset:Asset) ASSERT asset.mac IS UNIQUE;
-                CREATE CONSTRAINT ON (ip:Ip) ASSERT ip.address IS UNIQUE;
-                CREATE CONSTRAINT ON (owner:Person) ASSERT owner.name IS UNIQUE
-                """
-    graph.run(constraint_statement)
+    constraint_statements = [
+        # "CREATE CONSTRAINT ON (asset:Asset) ASSERT asset.mac IS UNIQUE;",
+        # "CREATE CONSTRAINT ON (ip:Ip) ASSERT ip.address IS UNIQUE;",
+        "CREATE CONSTRAINT ON (owner:Person) ASSERT owner.name IS UNIQUE"]
+
+    for constraint_statement in constraint_statements:
+        graph.run(constraint_statement)
 
 
 @app.route('/')

@@ -32,7 +32,7 @@ from uuid import uuid4
 import apiclient
 import httplib2
 import os
-from flask import Flask, render_template, url_for, request, redirect, session, abort, flash
+from flask import Flask, render_template, url_for, request, redirect, session, abort, flash, Response
 from oauth2client import client
 from parseXML import parseXML
 from py2neo import Graph
@@ -48,14 +48,36 @@ app.secret_key = os.environ['APP_SECRET']  # for sessions
 app.config['UPLOAD_FOLDER'] = '/uploads'
 
 DEFAULT_NEO_URL = 'http://neo4j:secret@localhost:7474'
-graph = Graph(os.environ.get('GRAPHENEDB_URL', DEFAULT_NEO_URL), bolt=False)
+graph = Graph(os.environ.get('GRAPHSTORY_URL', DEFAULT_NEO_URL), bolt=False)
 
 UPLOAD_FOLDER = '/uploads'
 ALLOWED_EXTENSIONS = {'xml'}
 TWO_WEEKS = 1209600
 
 
-def login_required(f):
+def check_auth(username, password):
+    return username == os.environ['API_USER'] and password == os.environ['API_PASSWORD']
+
+
+def authenticate():
+    return Response(
+        'Could not verify your access level for that URL.\n'
+        'You have to login with proper credentials', 401,
+        {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+
+def basic_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            return authenticate()
+        return f(*args, **kwargs)
+
+    return decorated
+
+
+def google_login(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'CLIENT_ID' in os.environ:
@@ -75,6 +97,7 @@ def allowed_file(filename):
 def create_indexes():
     constraint_statements = [
         # "CREATE CONSTRAINT ON (asset:Asset) ASSERT asset.mac IS UNIQUE;",
+        "CREATE CONSTRAINT ON (asset:Asset) ASSERT asset.serial IS UNIQUE;",
         # "CREATE CONSTRAINT ON (ip:Ip) ASSERT ip.address IS UNIQUE;",
         "CREATE CONSTRAINT ON (owner:Person) ASSERT owner.name IS UNIQUE"]
 
@@ -83,7 +106,7 @@ def create_indexes():
 
 
 @app.route('/')
-@login_required
+@google_login
 def index():
     assets = graph.data(
         """MATCH (asset:Asset)
@@ -177,8 +200,17 @@ def logout():
     return redirect(url_for('index'))
 
 
+def get_parameter_value(req, name):
+    form = req.form
+    if form.has_key(name):
+        return form[name]
+    else:
+        return "Unknown"
+
+
 @app.route('/api/add/asset', methods=['POST'])
-@login_required
+@google_login
+@basic_auth
 def add_asset():
     statement = """
                 MERGE (asset:Asset {
@@ -194,26 +226,30 @@ def add_asset():
                     notes:{notes},
                     state:{state}
                     })
-                MERGE (ip:Ip {address:{ip}})
-                MERGE    (asset)-[:HAS_IP]->(ip)
+
+                FOREACH(x IN (CASE WHEN {ip} IS NULL THEN [] ELSE [''] END) |
+                    MERGE (ip:Ip {address:{ip}})
+                    MERGE  (asset)-[:HAS_IP]->(ip)
+                )
+
                 MERGE    (owner:Person {name:{owner}})
                 MERGE    (owner)-[:OWNS]->(asset)"""
 
-    form = request.form
+    # args = request.args
     graph.run(statement,
               uid=(str(uuid4())),
-              model=(form['model']),
-              make=(form['make']),
-              serial=(form['serial']),
-              ip=(form['ip']),
-              mac=(form['mac']),
-              date_issued=parse_time(form['date_issued']),
-              date_renewal=parse_time(form['date_renewal']),
-              condition=(form['condition']),
-              location=(form['location']),
-              owner=(form['owner']),
-              notes=(form['notes']),
-              state=form['state'])
+              model=(get_parameter_value(request, 'model')),
+              make=(get_parameter_value(request, 'make')),
+              serial=(get_parameter_value(request, 'serial')),
+              ip=(get_parameter_value(request, 'ip')),
+              mac=(get_parameter_value(request, 'mac')),
+              date_issued=parse_time(get_parameter_value(request, 'date_issued')),
+              date_renewal=parse_time(get_parameter_value(request, 'date_renewal')),
+              condition=(get_parameter_value(request, 'condition')),
+              location=(get_parameter_value(request, 'location')),
+              owner=(get_parameter_value(request, 'owner')),
+              notes=(get_parameter_value(request, 'notes')),
+              state=get_parameter_value(request, 'state'))
 
     return redirect("/")
 
@@ -221,7 +257,7 @@ def add_asset():
 # UPDATE
 
 @app.route('/api/update/asset/', methods=['POST'])
-@login_required
+@google_login
 def update_asset():
     form = request.form
     statement = """
@@ -279,7 +315,7 @@ def update_asset():
 
 
 @app.route('/api/delete/asset/<uid>', methods=['GET'])
-@login_required
+@google_login
 def assetDeleteByUID(uid):
     statement = "MATCH (asset:Asset {uid:{uid}}) DETACH DELETE asset"
     graph.run(statement, uid=uid)
@@ -288,7 +324,7 @@ def assetDeleteByUID(uid):
 
 
 @app.route('/renewals')
-@login_required
+@google_login
 def renewals():
     data = get_renewals()
 
@@ -318,7 +354,7 @@ def get_renewals():
 
 
 @app.route('/api/upload', methods=['GET', 'POST'])
-@login_required
+@google_login
 def uploadFile():
     if 'upload_data' in session:
 
@@ -372,14 +408,14 @@ def uploadFile():
 
 
 @app.route('/api/upload/clear')
-@login_required
+@google_login
 def uploadClear():
     session.pop('upload_data', None)
     return redirect(url_for('index'))
 
 
 @app.route('/api/cleanup')
-@login_required
+@google_login
 def cleanup():
     # gets rid of owners or
     statement = """

@@ -245,7 +245,7 @@ def add_asset_implementation(request):
 
 # UPDATE
 
-@app.route('/api/update/asset/', methods=['POST'])
+@app.route('/api/update/asset', methods=['POST'])
 @google_login
 def update_asset():
     form = request.form

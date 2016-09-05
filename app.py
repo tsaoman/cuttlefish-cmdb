@@ -32,7 +32,8 @@ from uuid import uuid4
 import apiclient
 import httplib2
 import os
-from flask import Flask, render_template, url_for, request, redirect, session, abort, flash, Response
+from flask import Flask, render_template, url_for, request, redirect, session, abort, flash, Response, jsonify
+from flask_httpauth import HTTPBasicAuth
 from oauth2client import client
 from parseXML import parseXML
 from py2neo import Graph
@@ -53,29 +54,11 @@ graph = Graph(os.environ.get('GRAPHSTORY_URL', DEFAULT_NEO_URL), bolt=False)
 UPLOAD_FOLDER = '/uploads'
 ALLOWED_EXTENSIONS = {'xml'}
 TWO_WEEKS = 1209600
+basic_auth = HTTPBasicAuth()
 
-
-def check_auth(username, password):
+@basic_auth.verify_password
+def verify_password(username, password):
     return username == os.environ['API_USER'] and password == os.environ['API_PASSWORD']
-
-
-def authenticate():
-    return Response(
-        'Could not verify your access level for that URL.\n'
-        'You have to login with proper credentials', 401,
-        {'WWW-Authenticate': 'Basic realm="Login Required"'})
-
-
-def basic_auth(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        auth = request.authorization
-        if not auth or not check_auth(auth.username, auth.password):
-            return authenticate()
-        return f(*args, **kwargs)
-
-    return decorated
-
 
 def google_login(f):
     @wraps(f)
@@ -207,11 +190,20 @@ def get_parameter_value(req, name):
     else:
         return "Unknown"
 
+@app.route('/api/v1/asset/new', methods=['POST'])
+@basic_auth.login_required
+def add_asset_from_api_and_return_json():
+    add_asset_implementation()
+    return jsonify({'message':'OK'})
 
 @app.route('/api/add/asset', methods=['POST'])
 @google_login
-@basic_auth
-def add_asset():
+def add_asset_and_return_html():
+    add_asset_implementation()
+    return redirect("/")
+
+
+def add_asset_implementation():
     statement = """
                 MERGE (asset:Asset {
                     uid:{uid},
@@ -234,8 +226,6 @@ def add_asset():
 
                 MERGE    (owner:Person {name:{owner}})
                 MERGE    (owner)-[:OWNS]->(asset)"""
-
-    # args = request.args
     graph.run(statement,
               uid=(str(uuid4())),
               model=(get_parameter_value(request, 'model')),
@@ -250,8 +240,6 @@ def add_asset():
               owner=(get_parameter_value(request, 'owner')),
               notes=(get_parameter_value(request, 'notes')),
               state=get_parameter_value(request, 'state'))
-
-    return redirect("/")
 
 
 # UPDATE

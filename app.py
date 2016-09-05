@@ -184,11 +184,15 @@ def logout():
 
 
 def get_parameter_value(req, name):
+    value = "Unknown"
     form = req.form
     if name in form:
-        return form[name]
+        value = form[name]
     else:
-        return "Unknown"
+        if name == 'state':
+            value = 'Stock'
+
+    return value
 
 @app.route('/api/v1/asset/new', methods=['POST'])
 @basic_auth.login_required
@@ -286,19 +290,19 @@ def update_asset():
                 """
 
     graph.run(statement,
-              uid=(form['uid']),
-              model=(form['model']),
-              make=(form['make']),
-              serial=(form['serial']),
-              ip=(form['ip']),
-              mac=(form['mac']),
+              uid=get_parameter_value(request,'uid'),
+              model=get_parameter_value(request,'model'),
+              make=get_parameter_value(request,'make'),
+              serial=get_parameter_value(request,'serial'),
+              ip=get_parameter_value(request,'ip'),
+              mac=get_parameter_value(request,'mac'),
               date_issued=parse_time(form['date_issued']),
               date_renewal=parse_time(form['date_renewal']),
-              condition=(form['condition']),
-              owner=(form['owner']),
-              location=(form['location']),
-              notes=(form['notes']),
-              state=(form['state']))
+              condition=get_parameter_value(request,'condition'),
+              owner=get_parameter_value(request,'owner'),
+              location=get_parameter_value(request,'location'),
+              notes=get_parameter_value(request,'notes'),
+              state=get_parameter_value(request,'state'))
 
     return redirect(url_for('index'))
 

@@ -185,7 +185,7 @@ def logout():
 
 def get_parameter_value(req, name):
     form = req.form
-    if form.has_key(name):
+    if name in form:
         return form[name]
     else:
         return "Unknown"
@@ -193,17 +193,17 @@ def get_parameter_value(req, name):
 @app.route('/api/v1/asset/new', methods=['POST'])
 @basic_auth.login_required
 def add_asset_from_api_and_return_json():
-    add_asset_implementation()
+    add_asset_implementation(request)
     return jsonify({'message':'OK'})
 
 @app.route('/api/add/asset', methods=['POST'])
 @google_login
 def add_asset_and_return_html():
-    add_asset_implementation()
+    add_asset_implementation(request)
     return redirect("/")
 
 
-def add_asset_implementation():
+def add_asset_implementation(request):
     statement = """
                 MERGE (asset:Asset {
                     uid:{uid},
@@ -226,6 +226,7 @@ def add_asset_implementation():
 
                 MERGE    (owner:Person {name:{owner}})
                 MERGE    (owner)-[:OWNS]->(asset)"""
+
     graph.run(statement,
               uid=(str(uuid4())),
               model=(get_parameter_value(request, 'model')),

@@ -32,7 +32,7 @@ from uuid import uuid4
 import apiclient
 import httplib2
 import os
-from flask import Flask, render_template, url_for, request, redirect, session, abort, flash, Response, jsonify
+from flask import Flask, render_template, url_for, request, redirect, session, abort, flash, jsonify
 from flask_httpauth import HTTPBasicAuth
 from oauth2client import client
 from parseXML import parseXML
@@ -53,12 +53,14 @@ graph = Graph(os.environ.get('GRAPHSTORY_URL', DEFAULT_NEO_URL), bolt=False)
 
 UPLOAD_FOLDER = '/uploads'
 ALLOWED_EXTENSIONS = {'xml'}
-TWO_WEEKS = 1209600
+
 basic_auth = HTTPBasicAuth()
+
 
 @basic_auth.verify_password
 def verify_password(username, password):
     return username == os.environ['API_USER'] and password == os.environ['API_PASSWORD']
+
 
 def google_login(f):
     @wraps(f)
@@ -78,19 +80,44 @@ def allowed_file(filename):
 
 
 def create_indexes():
-    constraint_statements = [
-        # "CREATE CONSTRAINT ON (asset:Asset) ASSERT asset.mac IS UNIQUE;",
+    for constraint_statement in [
         "CREATE CONSTRAINT ON (asset:Asset) ASSERT asset.serial IS UNIQUE;",
-        # "CREATE CONSTRAINT ON (ip:Ip) ASSERT ip.address IS UNIQUE;",
-        "CREATE CONSTRAINT ON (owner:Person) ASSERT owner.name IS UNIQUE"]
-
-    for constraint_statement in constraint_statements:
+        "CREATE CONSTRAINT ON (owner:Person) ASSERT owner.name IS UNIQUE"]:
         graph.run(constraint_statement)
 
+
+def get_local_date(epoch_date):
+    return time.strftime(DATE_FORMAT, time.gmtime(int(epoch_date)))
+
+
+def massage_date(asset, field):
+    value = asset[field]
+    if value:
+        local_date = get_local_date(value)
+        asset[field] = local_date
+    return asset
+
+
+def get_renewals():
+    statement = """
+                MATCH (asset:Asset)
+                WHERE (asset.date_renewal - 1209600.0) < (timestamp() / 1000.0) and asset.state = 'ASSIGNED'
+                WITH asset
+                OPTIONAL MATCH (asset)-[:HAS_IP]->(ip:Ip)
+                OPTIONAL MATCH (owner:Person)-[:OWNS]->(asset)
+                RETURN asset, owner, ip, id(asset) AS iid
+                """
+    try:
+        _renewals = graph.data(statement)
+    except ValueError:
+        pass
+    return _renewals
 
 @app.route('/')
 @google_login
 def index():
+    response = []
+    outdated_assets = len(get_renewals())
     assets = graph.data(
         """MATCH (asset:Asset)
         OPTIONAL MATCH (asset)-[:HAS_IP]->(ip:Ip)
@@ -99,26 +126,16 @@ def index():
 
     for row in assets:
         asset = row['asset']
-        date_issued = asset['date_issued']
-        if date_issued is not None:
-            asset['date_issued'] = get_local_date(date_issued)
+        row['asset'] = massage_date(asset, 'date_renewal')
+        row['asset'] = massage_date(asset, 'date_issued')
+        response.append(row)
 
-        date_renewal = asset['date_renewal']
-        if date_renewal is not None:
-            asset['date_renewal'] = get_local_date(date_renewal)
-
-    renewals = get_renewals()
-    outdated_assets = len(renewals)
     if outdated_assets > 0:
         flash('There are {} assets due for renewal'.format(outdated_assets))
 
     session.pop('upload_data', None)  # make sure session upload data is clear
 
-    return render_template("index.html", title="Asset Data", data=assets, username=get_username())
-
-
-def get_local_date(epoch_date):
-    return time.strftime(DATE_FORMAT, time.gmtime(int(epoch_date)))
+    return render_template("index.html", title="Asset Data", data=response, username=get_username())
 
 
 def get_username():
@@ -194,11 +211,13 @@ def get_parameter_value(req, name):
 
     return value
 
+
 @app.route('/api/v1/asset/new', methods=['POST'])
 @basic_auth.login_required
 def add_asset_from_api_and_return_json():
     add_asset_implementation(request)
-    return jsonify({'message':'OK'})
+    return jsonify({'message': 'OK'})
+
 
 @app.route('/api/add/asset', methods=['POST'])
 @google_login
@@ -290,19 +309,19 @@ def update_asset():
                 """
 
     graph.run(statement,
-              uid=get_parameter_value(request,'uid'),
-              model=get_parameter_value(request,'model'),
-              make=get_parameter_value(request,'make'),
-              serial=get_parameter_value(request,'serial'),
-              ip=get_parameter_value(request,'ip'),
-              mac=get_parameter_value(request,'mac'),
+              uid=get_parameter_value(request, 'uid'),
+              model=get_parameter_value(request, 'model'),
+              make=get_parameter_value(request, 'make'),
+              serial=get_parameter_value(request, 'serial'),
+              ip=get_parameter_value(request, 'ip'),
+              mac=get_parameter_value(request, 'mac'),
               date_issued=parse_time(form['date_issued']),
               date_renewal=parse_time(form['date_renewal']),
-              condition=get_parameter_value(request,'condition'),
-              owner=get_parameter_value(request,'owner'),
-              location=get_parameter_value(request,'location'),
-              notes=get_parameter_value(request,'notes'),
-              state=get_parameter_value(request,'state'))
+              condition=get_parameter_value(request, 'condition'),
+              owner=get_parameter_value(request, 'owner'),
+              location=get_parameter_value(request, 'location'),
+              notes=get_parameter_value(request, 'notes'),
+              state=get_parameter_value(request, 'state'))
 
     return redirect(url_for('index'))
 
@@ -330,20 +349,7 @@ def renewals():
     return render_template("index.html", title="New Renewals", data=data, username=get_username())
 
 
-def get_renewals():
-    statement = """
-                MATCH (asset:Asset)
-                WHERE (asset.date_renewal - 121000000.0) < (timestamp() / 1000.0) and asset.state = 'ASSIGNED'
-                WITH asset
-                OPTIONAL MATCH (asset)-[:HAS_IP]->(ip:Ip)
-                OPTIONAL MATCH (owner:Person)-[:OWNS]->(asset)
-                RETURN asset, owner, ip, id(asset) AS iid
-                """
-    try:
-        data = graph.data(statement)
-    except ValueError:
-        pass
-    return data
+
 
 
 @app.route('/api/upload', methods=['GET', 'POST'])

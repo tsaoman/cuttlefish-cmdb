@@ -3,10 +3,37 @@
     <label for="state" class="col-sm-4 form-control-label">State:</label>
     <div class="col-sm-8">
         <select name="state" class="form-control" id="AssetFormState">
-            <option value="STOCK" >Stock</option>
+            <option value="STOCK">Stock</option>
             <option value="ASSIGNED">Assigned</option>
             <option value="DISPOSED">Disposed</option>
         </select>
+    </div>
+</div>
+{% endmacro %}
+
+{% macro renewal_date() %}
+<div class="form-group row">
+    <label for="date_renewal" class="col-sm-4 form-control-label">Date of Renewal:</label>
+    <div class="col-sm-8">
+        <input data-provide="datepicker" type="text" class="form-control" name="date_renewal"
+               data-date-format="dd/mm/yyyy"
+               required
+               id="AssetFormDateRenewal"
+               placeholder="Date of renewal">
+    </div>
+</div>
+{% endmacro %}
+
+{% macro issue_date() %}
+<div class="form-group row">
+    <label for="date_issued" class="col-sm-4 form-control-label">Date Issued:</label>
+    <div class="col-sm-8 date">
+        <input data-provide="datepicker" type='text' class="form-control" name="date_issued"
+               data-date-format="dd/mm/yyyy"
+               data-date-todaybutton="true"
+               required
+               id="AssetFormDateIssued"
+               placeholder="Date Issued">
     </div>
 </div>
 {% endmacro %}

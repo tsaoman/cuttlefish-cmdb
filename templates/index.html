@@ -16,7 +16,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
-{% from 'macros.html' import statediv %}
+{% from 'macros.html' import statediv, issue_date, renewal_date %}
 {% extends "layout.html" %}
 
 {% block title %} Home {% endblock %}
@@ -42,7 +42,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <th>Make</th>
             <th>Serial</th>
             <th>IP</th>
-            <th>MAC Address (Wifi)</th>
+            <th>MAC Address</th>
             <th>Date Issued</th>
             <th>Renewal Date</th>
             <th class="default_hidden">Physical Condition</th>
@@ -55,7 +55,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         </thead>
         <tbody>
 
-        {% for row in data %}<!-- parse datastring from cypher -->
+        {% for row in data %}
+
         <tr>
             <td id="uid">{{ row['asset']['uid'] }}</td>
             <td>{{ row['asset']['model'] }}</td>
@@ -64,13 +65,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <td>{{ row['ip']['address'] }}</td>
             <td>{{ row['asset']['mac'] }}</td>
             <td>{{ row['asset']['date_issued'] }}</td>
-            <td>{{ row['asset']['date_renewal'] }}
+            <td>{{ row['asset']['date_renewal'] }}</td>
             <td>{{ row['asset']['condition'] }}</td>
             <td>{{ row['owner']['name'] }}</td>
             <td>{{ row['asset']['location'] }}</td>
             <td>{{ row['asset']['notes'] }}</td>
             <td>{{ row['asset']['state'] }}</td>
-
         </tr>
         {% endfor %}
         </tbody>
@@ -136,26 +136,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         </div>
                     </div>
 
-                    <div class="form-group row">
-                        <label for="date_issued" class="col-sm-4 form-control-label">Date Issued:</label>
-                        <div class="col-sm-8 date">
-                            <input data-provide="datepicker" type='text' class="form-control" name="date_issued"
-                                   data-date-format="dd/mm/yyyy"
-                                   data-date-todaybutton="true"
-                                   required
-                                   placeholder="Date Issued">
-                        </div>
-                    </div>
+                    {{ issue_date() }}
 
-                    <div class="form-group row">
-                        <label for="date_renewal" class="col-sm-4 form-control-label">Date of Renewal:</label>
-                        <div class="col-sm-8">
-                            <input data-provide="datepicker" type="text" class="form-control" name="date_renewal"
-                                   data-date-format="dd/mm/yyyy"
-                                   required
-                                   placeholder="Date of renewal">
-                        </div>
-                    </div>
+                    {{ renewal_date() }}
 
                     <div class="form-group row">
                         <label for="condition" class="col-sm-4 form-control-label">Physical Condition:</label>
@@ -259,21 +242,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         </div>
                     </div>
 
-                    <div class="form-group row">
-                        <label for="date_issued" class="col-sm-4 form-control-label">Date Issued:</label>
-                        <div class="col-sm-8">
-                            <input data-provide="datepicker" type='text' class="form-control" id="AssetFormDateIssued"
-                                   name="date_issued" placeholder="Date Issued">
-                        </div>
-                    </div>
+                    {{ issue_date() }}
 
-                    <div class="form-group row">
-                        <label for="date_renewal" class="col-sm-4 form-control-label">Date of renewal:</label>
-                        <div class="col-sm-8">
-                            <input data-provide="datepicker" type="text" class="form-control" name="date_renewal"
-                                   id="AssetFormDateRenewal" placeholder="Date of renewal">
-                        </div>
-                    </div>
+                    {{ renewal_date() }}
 
                     <div class="form-group row">
                         <label for="condition" class="col-sm-4 form-control-label">Physical Condition:</label>

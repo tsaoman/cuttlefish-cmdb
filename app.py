@@ -82,7 +82,8 @@ def allowed_file(filename):
 def create_indexes():
     for constraint_statement in [
         "CREATE CONSTRAINT ON (asset:Asset) ASSERT asset.serial IS UNIQUE;",
-        "CREATE CONSTRAINT ON (owner:Person) ASSERT owner.name IS UNIQUE"]:
+        "CREATE CONSTRAINT ON (owner:Person) ASSERT owner.name IS UNIQUE",
+        "CREATE CONSTRAINT ON (kind:Kind) ASSERT kind.name IS UNIQUE"]:
         graph.run(constraint_statement)
 
 
@@ -113,6 +114,7 @@ def get_renewals():
         pass
     return _renewals
 
+
 @app.route('/')
 @google_login
 def index():
@@ -122,7 +124,8 @@ def index():
         """MATCH (asset:Asset)
         OPTIONAL MATCH (asset)-[:HAS_IP]->(ip:Ip)
         OPTIONAL MATCH (owner:Person)-[:OWNS]->(asset)
-        RETURN asset, owner, ip, id(asset) AS iid""")
+        OPTIONAL MATCH (asset)-[:ASSET_KIND]->(kind)
+        RETURN asset, owner, ip, id(asset) AS iid, kind.name as kind""")
 
     for row in assets:
         asset = row['asset']
@@ -243,6 +246,11 @@ def add_asset_implementation(request):
                     })
 
                 FOREACH(x IN (CASE WHEN {ip} IS NULL THEN [] ELSE [''] END) |
+                    MERGE (kind:Kind {name:{kind}})
+                    MERGE (asset)-[:ASSET_KIND]->(kind)
+                )
+
+                FOREACH(x IN (CASE WHEN {ip} IS NULL THEN [] ELSE [''] END) |
                     MERGE (ip:Ip {address:{ip}})
                     MERGE  (asset)-[:HAS_IP]->(ip)
                 )
@@ -263,6 +271,7 @@ def add_asset_implementation(request):
               location=(get_parameter_value(request, 'location')),
               owner=(get_parameter_value(request, 'owner')),
               notes=(get_parameter_value(request, 'notes')),
+              kind=get_parameter_value(request, 'kind'),
               state=get_parameter_value(request, 'state'))
 
 
@@ -290,6 +299,11 @@ def update_asset():
                 MERGE (ip:Ip {address:{ip}})
                 WITH asset, ip
                 OPTIONAL MATCH (asset)-[rip:HAS_IP]->(ip0:Ip)
+
+                FOREACH(x IN (CASE WHEN {ip} IS NULL THEN [] ELSE [''] END) |
+                    MERGE (kind:Kind {name:{kind}})
+                    MERGE (asset)-[:ASSET_KIND]->(kind)
+                )
 
                 FOREACH(x IN (CASE WHEN ip <> ip0   THEN [1] ELSE [] END) |
                     DETACH DELETE rip
@@ -321,6 +335,7 @@ def update_asset():
               owner=get_parameter_value(request, 'owner'),
               location=get_parameter_value(request, 'location'),
               notes=get_parameter_value(request, 'notes'),
+              kind=get_parameter_value(request, 'kind'),
               state=get_parameter_value(request, 'state'))
 
     return redirect(url_for('index'))
@@ -347,9 +362,6 @@ def renewals():
         row['asset']['date_renewal'] = get_local_date(renewal_)
 
     return render_template("index.html", title="New Renewals", data=data, username=get_username())
-
-
-
 
 
 @app.route('/api/upload', methods=['GET', 'POST'])

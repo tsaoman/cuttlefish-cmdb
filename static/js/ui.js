@@ -40,8 +40,8 @@ $(document).ready(function() {
 
     //display current row data in form
     $(".modal-body #AssetFormUID").val(data[0]);
-    $(".modal-body #AssetFormModel").val(data[1]);
-    $(".modal-body #AssetFormMake").val(data[2]);
+    $(".modal-body #AssetFormModel").val(data[2]);
+    $(".modal-body #AssetFormMake").val(data[1]);
     $(".modal-body #AssetFormSerial").val(data[3]);
     $(".modal-body #AssetFormIp").val(data[4]);
     $(".modal-body #AssetFormMac").val(data[5]);
@@ -52,6 +52,7 @@ $(document).ready(function() {
     $(".modal-body #AssetFormLocation").val(data[10]);
     $(".modal-body #AssetFormNotes").val(data[11]);
     $(".modal-body #AssetFormState").val(data[12]);
+    $(".modal-body #AssetFormKind").val(data[13]);
 
     //open confirm delete modal and pass data
     $('#assetDeleteButton').on('click', function () {

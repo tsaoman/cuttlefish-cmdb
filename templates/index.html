@@ -16,7 +16,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
-{% from 'macros.html' import statediv, issue_date, renewal_date %}
+{% from 'macros.html' import statediv, issue_date, renewal_date, asset_kind %}
 {% extends "layout.html" %}
 
 {% block title %} Home {% endblock %}
@@ -38,11 +38,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <thead>
         <tr>
             <th class="default_hidden">UID</th>
-            <th>Model</th>
             <th>Make</th>
+            <th>Model</th>
+
             <th>Serial</th>
-            <th>IP</th>
-            <th>MAC Address</th>
+            <th class="default_hidden">>Last IP</th>
+            <th class="default_hidden">>MAC Address</th>
             <th>Date Issued</th>
             <th>Renewal Date</th>
             <th class="default_hidden">Physical Condition</th>
@@ -50,6 +51,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <th class="default_hidden">Location</th>
             <th class="default_hidden">Notes</th>
             <th class="default_hidden">State</th>
+            <th class="default_hidden">Kind</th>
 
         </tr>
         </thead>
@@ -71,6 +73,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <td>{{ row['asset']['location'] }}</td>
             <td>{{ row['asset']['notes'] }}</td>
             <td>{{ row['asset']['state'] }}</td>
+            <td>{{ row['kind'] }}</td>
         </tr>
         {% endfor %}
         </tbody>
@@ -169,6 +172,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     </div>
 
                     {{ statediv() }}
+
+                    {{ asset_kind() }}
 
                 </form>
 
@@ -279,6 +284,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     </div>
 
                     {{ statediv() }}
+
+                    {{ asset_kind() }}
+
                 </form>
 
             </div><!-- end modal body -->

@@ -2,7 +2,8 @@
 <div class="form-group row">
     <label for="state" class="col-sm-4 form-control-label">State:</label>
     <div class="col-sm-8">
-        <select name="state" class="form-control" id="AssetFormState">
+        <select name="state" required
+                class="form-control" id="AssetFormState">
             <option value="STOCK">Stock</option>
             <option value="ASSIGNED">Assigned</option>
             <option value="DISPOSED">Disposed</option>
@@ -34,6 +35,21 @@
                required
                id="AssetFormDateIssued"
                placeholder="Date Issued">
+    </div>
+</div>
+{% endmacro %}
+
+{% macro asset_kind() %}
+<div class="form-group row">
+    <label for="asset_kind" class="col-sm-4 form-control-label">Asset Kind:</label>
+    <div class="col-sm-8 date">
+        <select name="kind" class="form-control" id="AssetFormKind" required>
+            <option value="LAPTOP">Laptop</option>
+            <option value="DESKTOP">Desktop</option>
+            <option value="DISPLAY">Display</option>
+            <option value="PHONE">Phone</option>
+            <option value="PRINTER">Printer</option>
+        </select>
     </div>
 </div>
 {% endmacro %}

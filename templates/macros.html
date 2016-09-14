@@ -53,3 +53,23 @@
     </div>
 </div>
 {% endmacro %}
+
+{% macro asset_cost() %}
+<div class="form-group row">
+    <div class="col-sm-4">
+        <label for="cost" class="col-sm-4 form-control-label">Cost:</label>
+
+            <input type="number" class="form-control" name="cost" placeholder="Cost"  id="AssetFormCost">
+
+            <label for="currency" class="col-sm-4 form-control-label">Currency:</label>
+            <select name="currency" class="form-control" id="AssetFormCurrency" id="AssetFormCurrency">
+                <option value="USD">USD</option>
+                <option value="SEK">SEK</option>
+                <option value="CAD">CAD</option>
+                <option value="GBP">GBP</option>
+                <option value="NZD">NZD</option>
+            </select>
+
+    </div>
+</div>
+{% endmacro %}

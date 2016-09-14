@@ -242,7 +242,9 @@ def add_asset_implementation(request):
                     condition:{condition},
                     location:{location},
                     notes:{notes},
-                    state:{state}
+                    state:{state},
+                    cost:{cost},
+                    currency:{currency}
                     })
 
                 FOREACH(x IN (CASE WHEN {ip} IS NULL THEN [] ELSE [''] END) |
@@ -272,7 +274,9 @@ def add_asset_implementation(request):
               owner=(get_parameter_value(request, 'owner')),
               notes=(get_parameter_value(request, 'notes')),
               kind=get_parameter_value(request, 'kind'),
-              state=get_parameter_value(request, 'state'))
+              state=get_parameter_value(request, 'state'),
+              cost=get_parameter_value(request, 'cost'),
+              currency=get_parameter_value(request, 'currency'))
 
 
 # UPDATE
@@ -295,6 +299,8 @@ def update_asset():
                 SET asset.location={location}
                 SET asset.notes={notes}
                 SET asset.state={state}
+                SET asset.cost={cost}
+                SET asset.currency={currency}
 
                 MERGE (ip:Ip {address:{ip}})
                 WITH asset, ip
@@ -336,7 +342,9 @@ def update_asset():
               location=get_parameter_value(request, 'location'),
               notes=get_parameter_value(request, 'notes'),
               kind=get_parameter_value(request, 'kind'),
-              state=get_parameter_value(request, 'state'))
+              state=get_parameter_value(request, 'state'),
+              cost=get_parameter_value(request, 'cost'),
+              currency=get_parameter_value(request, 'currency'))
 
     return redirect(url_for('index'))
 

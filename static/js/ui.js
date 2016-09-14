@@ -53,6 +53,8 @@ $(document).ready(function() {
     $(".modal-body #AssetFormNotes").val(data[11]);
     $(".modal-body #AssetFormState").val(data[12]);
     $(".modal-body #AssetFormKind").val(data[13]);
+    $(".modal-body #AssetFormCost").val(data[14]);
+    $(".modal-body #AssetFormCurrency").val(data[15]);
 
     //open confirm delete modal and pass data
     $('#assetDeleteButton').on('click', function () {

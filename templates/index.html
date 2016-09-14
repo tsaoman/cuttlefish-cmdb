@@ -16,7 +16,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
-{% from 'macros.html' import statediv, issue_date, renewal_date, asset_kind %}
+{% from 'macros.html' import statediv, issue_date, renewal_date, asset_kind, asset_cost %}
 {% extends "layout.html" %}
 
 {% block title %} Home {% endblock %}
@@ -40,7 +40,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <th class="default_hidden">UID</th>
             <th>Make</th>
             <th>Model</th>
-
             <th>Serial</th>
             <th class="default_hidden">>Last IP</th>
             <th class="default_hidden">>MAC Address</th>
@@ -52,6 +51,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <th class="default_hidden">Notes</th>
             <th class="default_hidden">State</th>
             <th class="default_hidden">Kind</th>
+            <th class="default_hidden">Cost</th>
+            <th class="default_hidden">Currency</th>
 
         </tr>
         </thead>
@@ -74,6 +75,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <td>{{ row['asset']['notes'] }}</td>
             <td>{{ row['asset']['state'] }}</td>
             <td>{{ row['kind'] }}</td>
+            <td>{{ row['asset']['cost'] }}</td>
+            <td>{{ row['asset']['currency'] }}</td>
         </tr>
         {% endfor %}
         </tbody>
@@ -174,6 +177,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     {{ statediv() }}
 
                     {{ asset_kind() }}
+
+                    {{ asset_cost() }}
 
                 </form>
 
@@ -286,6 +291,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     {{ statediv() }}
 
                     {{ asset_kind() }}
+
+                    {{ asset_cost() }}
 
                 </form>
 

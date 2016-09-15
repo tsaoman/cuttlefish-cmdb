@@ -91,14 +91,6 @@ def get_local_date(epoch_date):
     return time.strftime(DATE_FORMAT, time.gmtime(int(epoch_date)))
 
 
-def massage_date(asset, field):
-    value = asset[field]
-    if value:
-        local_date = get_local_date(value)
-        asset[field] = local_date
-    return asset
-
-
 def get_renewals():
     statement = """
                 MATCH (asset:Asset)
@@ -115,30 +107,26 @@ def get_renewals():
     return _renewals
 
 
-@app.route('/')
-@google_login
-def index():
+def get_parameter_value(req, name):
+    value = "Unknown"
+    form = req.form
+    if name in form:
+        value = form[name]
+    else:
+        if name == 'state':
+            value = 'Stock'
+
+    return value
+
+
+def query_and_return_json(query):
     response = []
-    outdated_assets = len(get_renewals())
-    assets = graph.data(
-        """MATCH (asset:Asset)
-        OPTIONAL MATCH (asset)-[:HAS_IP]->(ip:Ip)
-        OPTIONAL MATCH (owner:Person)-[:OWNS]->(asset)
-        OPTIONAL MATCH (asset)-[:ASSET_KIND]->(kind)
-        RETURN asset, owner, ip, id(asset) AS iid, kind.name as kind""")
-
-    for row in assets:
-        asset = row['asset']
-        row['asset'] = massage_date(asset, 'date_renewal')
-        row['asset'] = massage_date(asset, 'date_issued')
-        response.append(row)
-
-    if outdated_assets > 0:
-        flash('There are {} assets due for renewal'.format(outdated_assets))
-
-    session.pop('upload_data', None)  # make sure session upload data is clear
-
-    return render_template("index.html", title="Asset Data", data=response, username=get_username())
+    for a in graph.data(query):
+        response.append(
+            [a['uid'], a['model'], a['make'], a['serial'], a['ip'], a['mac'], get_local_date(a['date_issued']),
+             get_local_date(a['date_renewal']),
+             a['condition'], a['name'], a['location'], a['notes'], a['state'], a['kind'], a['cost'], a['currency']])
+    return jsonify({"data": response})
 
 
 def get_username():
@@ -147,6 +135,70 @@ def get_username():
 
 def parse_time(string):
     return int(time.mktime(time.strptime(string, DATE_FORMAT)))
+
+
+def add_asset_implementation(request):
+    statement = """
+                MERGE (asset:Asset {
+                    uid:{uid},
+                    model:{model},
+                    make:{make},
+                    serial:{serial},
+                    mac:{mac},
+                    date_issued:{date_issued},
+                    date_renewal:{date_renewal},
+                    condition:{condition},
+                    location:{location},
+                    notes:{notes},
+                    state:{state},
+                    cost:{cost},
+                    currency:{currency}
+                    })
+
+                FOREACH(x IN (CASE WHEN {ip} IS NULL THEN [] ELSE [''] END) |
+                    MERGE (kind:Kind {name:{kind}})
+                    MERGE (asset)-[:ASSET_KIND]->(kind)
+                )
+
+                FOREACH(x IN (CASE WHEN {ip} IS NULL THEN [] ELSE [''] END) |
+                    MERGE (ip:Ip {address:{ip}})
+                    MERGE  (asset)-[:HAS_IP]->(ip)
+                )
+
+                MERGE    (owner:Person {name:{owner}})
+                MERGE    (owner)-[:OWNS]->(asset)"""
+
+    graph.run(statement,
+              uid=(str(uuid4())),
+              model=(get_parameter_value(request, 'model')),
+              make=(get_parameter_value(request, 'make')),
+              serial=(get_parameter_value(request, 'serial')),
+              ip=(get_parameter_value(request, 'ip')),
+              mac=(get_parameter_value(request, 'mac')),
+              date_issued=parse_time(get_parameter_value(request, 'date_issued')),
+              date_renewal=parse_time(get_parameter_value(request, 'date_renewal')),
+              condition=(get_parameter_value(request, 'condition')),
+              location=(get_parameter_value(request, 'location')),
+              owner=(get_parameter_value(request, 'owner')),
+              notes=(get_parameter_value(request, 'notes')),
+              kind=get_parameter_value(request, 'kind'),
+              state=get_parameter_value(request, 'state'),
+              cost=get_parameter_value(request, 'cost'),
+              currency=get_parameter_value(request, 'currency'))
+
+
+@app.route('/')
+@google_login
+def index():
+    response = []
+    outdated_assets = len(get_renewals())
+
+    if outdated_assets > 0:
+        flash('There are {} assets due for renewal'.format(outdated_assets))
+
+    session.pop('upload_data', None)  # make sure session upload data is clear
+
+    return render_template("index.html", title="Asset Data", action='assets', username=get_username())
 
 
 @app.route('/login')
@@ -203,16 +255,56 @@ def logout():
     return redirect(url_for('index'))
 
 
-def get_parameter_value(req, name):
-    value = "Unknown"
-    form = req.form
-    if name in form:
-        value = form[name]
-    else:
-        if name == 'state':
-            value = 'Stock'
+@app.route('/api/v1/renewals.json', methods=['GET'])
+@google_login
+def renewals_endpoint():
+    return query_and_return_json("""MATCH (asset:Asset)
+           WHERE (asset.date_renewal - 1209600.0) < (timestamp() / 1000.0) and asset.state = 'ASSIGNED'
+           WITH asset
+           OPTIONAL MATCH (asset)-[:HAS_IP]->(ip:Ip)
+           OPTIONAL MATCH (owner:Person)-[:OWNS]->(asset)
+           OPTIONAL MATCH (asset)-[:ASSET_KIND]->(kind)
+        RETURN asset.uid as uid,
+               asset.model as model,
+               asset.make as make,
+               asset.serial as serial,
+               ip.address as ip,
+               asset.mac as mac,
+               asset.date_issued as date_issued,
+               asset.date_renewal as date_renewal,
+               asset.condition as condition,
+               owner.name as name,
+               asset.location as location,
+               asset.notes as notes,
+               asset.state as state,
+               kind.name as kind,
+               asset.cost as cost,
+               asset.currency as currency""")
 
-    return value
+
+@app.route('/api/v1/assets.json', methods=['GET'])
+@google_login
+def assets_endpoint():
+    return query_and_return_json("""MATCH (asset:Asset)
+        OPTIONAL MATCH (asset)-[:HAS_IP]->(ip:Ip)
+        OPTIONAL MATCH (owner:Person)-[:OWNS]->(asset)
+        OPTIONAL MATCH (asset)-[:ASSET_KIND]->(kind)
+        RETURN asset.uid as uid,
+               asset.model as model,
+               asset.make as make,
+               asset.serial as serial,
+               ip.address as ip,
+               asset.mac as mac,
+               asset.date_issued as date_issued,
+               asset.date_renewal as date_renewal,
+               asset.condition as condition,
+               owner.name as name,
+               asset.location as location,
+               asset.notes as notes,
+               asset.state as state,
+               kind.name as kind,
+               asset.cost as cost,
+               asset.currency as currency""")
 
 
 @app.route('/api/v1/asset/new', methods=['POST'])
@@ -228,58 +320,6 @@ def add_asset_and_return_html():
     add_asset_implementation(request)
     return redirect("/")
 
-
-def add_asset_implementation(request):
-    statement = """
-                MERGE (asset:Asset {
-                    uid:{uid},
-                    model:{model},
-                    make:{make},
-                    serial:{serial},
-                    mac:{mac},
-                    date_issued:{date_issued},
-                    date_renewal:{date_renewal},
-                    condition:{condition},
-                    location:{location},
-                    notes:{notes},
-                    state:{state},
-                    cost:{cost},
-                    currency:{currency}
-                    })
-
-                FOREACH(x IN (CASE WHEN {ip} IS NULL THEN [] ELSE [''] END) |
-                    MERGE (kind:Kind {name:{kind}})
-                    MERGE (asset)-[:ASSET_KIND]->(kind)
-                )
-
-                FOREACH(x IN (CASE WHEN {ip} IS NULL THEN [] ELSE [''] END) |
-                    MERGE (ip:Ip {address:{ip}})
-                    MERGE  (asset)-[:HAS_IP]->(ip)
-                )
-
-                MERGE    (owner:Person {name:{owner}})
-                MERGE    (owner)-[:OWNS]->(asset)"""
-
-    graph.run(statement,
-              uid=(str(uuid4())),
-              model=(get_parameter_value(request, 'model')),
-              make=(get_parameter_value(request, 'make')),
-              serial=(get_parameter_value(request, 'serial')),
-              ip=(get_parameter_value(request, 'ip')),
-              mac=(get_parameter_value(request, 'mac')),
-              date_issued=parse_time(get_parameter_value(request, 'date_issued')),
-              date_renewal=parse_time(get_parameter_value(request, 'date_renewal')),
-              condition=(get_parameter_value(request, 'condition')),
-              location=(get_parameter_value(request, 'location')),
-              owner=(get_parameter_value(request, 'owner')),
-              notes=(get_parameter_value(request, 'notes')),
-              kind=get_parameter_value(request, 'kind'),
-              state=get_parameter_value(request, 'state'),
-              cost=get_parameter_value(request, 'cost'),
-              currency=get_parameter_value(request, 'currency'))
-
-
-# UPDATE
 
 @app.route('/api/update/asset', methods=['POST'])
 @google_login
@@ -361,15 +401,7 @@ def assetDeleteByUID(uid):
 @app.route('/renewals')
 @google_login
 def renewals():
-    data = get_renewals()
-
-    for row in data:
-        issued_ = int(row['asset']['date_issued'])
-        renewal_ = int(row['asset']['date_renewal'])
-        row['asset']['date_issued'] = get_local_date(issued_)
-        row['asset']['date_renewal'] = get_local_date(renewal_)
-
-    return render_template("index.html", title="New Renewals", data=data, username=get_username())
+    return render_template("index.html", title="New Renewals", action='renewals', username=get_username())
 
 
 @app.route('/api/upload', methods=['GET', 'POST'])
@@ -436,7 +468,6 @@ def uploadClear():
 @app.route('/api/cleanup')
 @google_login
 def cleanup():
-    # gets rid of owners or
     statement = """
                 MATCH (a:Owner)
                 WHERE size((a)--()) = 0
@@ -453,6 +484,5 @@ def cleanup():
 
 
 if __name__ == "__main__":
-    # app.run(host='0.0.0.0', port=(int(os.environ.get('PORT', 33507))))
     create_indexes()
     app.run()

@@ -34,7 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     <h1>{{ title }}</h1>
 
-    <table id="assets" class="table table-hover" cellspacing="0" width="100%">
+    <table id="assets" class="table table-hover" cellspacing="0" width="100%" data-ajax="/api/v1/{{ action }}.json">
         <thead>
         <tr>
             <th class="default_hidden">UID</th>
@@ -58,27 +58,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         </thead>
         <tbody>
 
-        {% for row in data %}
 
-        <tr>
-            <td id="uid">{{ row['asset']['uid'] }}</td>
-            <td>{{ row['asset']['model'] }}</td>
-            <td>{{ row['asset']['make'] }}</td>
-            <td>{{ row['asset']['serial'] }}</td>
-            <td>{{ row['ip']['address'] }}</td>
-            <td>{{ row['asset']['mac'] }}</td>
-            <td>{{ row['asset']['date_issued'] }}</td>
-            <td>{{ row['asset']['date_renewal'] }}</td>
-            <td>{{ row['asset']['condition'] }}</td>
-            <td>{{ row['owner']['name'] }}</td>
-            <td>{{ row['asset']['location'] }}</td>
-            <td>{{ row['asset']['notes'] }}</td>
-            <td>{{ row['asset']['state'] }}</td>
-            <td>{{ row['kind'] }}</td>
-            <td>{{ row['asset']['cost'] }}</td>
-            <td>{{ row['asset']['currency'] }}</td>
-        </tr>
-        {% endfor %}
         </tbody>
     </table>
 

@@ -286,6 +286,7 @@ def renewals_endpoint():
 @google_login
 def assets_endpoint():
     return query_and_return_json("""MATCH (asset:Asset)
+        WHERE asset.state <> "DISPOSED"
         OPTIONAL MATCH (asset)-[:HAS_IP]->(ip:Ip)
         OPTIONAL MATCH (owner:Person)-[:OWNS]->(asset)
         OPTIONAL MATCH (asset)-[:ASSET_KIND]->(kind)
@@ -306,6 +307,57 @@ def assets_endpoint():
                asset.cost as cost,
                asset.currency as currency""")
 
+@app.route('/api/v1/unallocated.json', methods=['GET'])
+@google_login
+def unallocated_endpoint():
+    return query_and_return_json("""MATCH (asset:Asset)
+        WHERE asset.state = 'Unknown' or asset.state = 'STOCK'
+        WITH asset
+        OPTIONAL MATCH (asset)-[:HAS_IP]->(ip:Ip)
+        OPTIONAL MATCH (owner:Person)-[:OWNS]->(asset)
+        OPTIONAL MATCH (asset)-[:ASSET_KIND]->(kind)
+        RETURN asset.uid as uid,
+               asset.model as model,
+               asset.make as make,
+               asset.serial as serial,
+               ip.address as ip,
+               asset.mac as mac,
+               asset.date_issued as date_issued,
+               asset.date_renewal as date_renewal,
+               asset.condition as condition,
+               owner.name as name,
+               asset.location as location,
+               asset.notes as notes,
+               asset.state as state,
+               kind.name as kind,
+               asset.cost as cost,
+               asset.currency as currency""")
+
+@app.route('/api/v1/disposed.json', methods=['GET'])
+@google_login
+def disposed_endpoint():
+    return query_and_return_json("""MATCH (asset:Asset)
+        WHERE asset.state = 'DISPOSED'
+        WITH asset
+        OPTIONAL MATCH (asset)-[:HAS_IP]->(ip:Ip)
+        OPTIONAL MATCH (owner:Person)-[:OWNS]->(asset)
+        OPTIONAL MATCH (asset)-[:ASSET_KIND]->(kind)
+        RETURN asset.uid as uid,
+               asset.model as model,
+               asset.make as make,
+               asset.serial as serial,
+               ip.address as ip,
+               asset.mac as mac,
+               asset.date_issued as date_issued,
+               asset.date_renewal as date_renewal,
+               asset.condition as condition,
+               owner.name as name,
+               asset.location as location,
+               asset.notes as notes,
+               asset.state as state,
+               kind.name as kind,
+               asset.cost as cost,
+               asset.currency as currency""")
 
 @app.route('/api/v1/asset/new', methods=['POST'])
 @basic_auth.login_required
@@ -402,6 +454,16 @@ def assetDeleteByUID(uid):
 @google_login
 def renewals():
     return render_template("index.html", title="New Renewals", action='renewals', username=get_username())
+
+@app.route('/unallocated')
+@google_login
+def unallocated():
+    return render_template("index.html", title="Machines with no confirmed owner", action='unallocated', username=get_username())\
+
+@app.route('/disposed')
+@google_login
+def disposed():
+    return render_template("index.html", title="Lost, Stolen or donated machines", action='disposed', username=get_username())
 
 
 @app.route('/api/upload', methods=['GET', 'POST'])

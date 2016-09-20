@@ -16,7 +16,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
-{% from 'macros.html' import statediv, issue_date, renewal_date, asset_kind, asset_cost %}
+{% from 'macros.html' import statediv, issue_date, renewal_date, asset_kind, asset_cost, asset_fields %}
 {% extends "layout.html" %}
 
 {% block title %} Home {% endblock %}
@@ -107,78 +107,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         </div>
                     </div>
 
-                    <div class="form-group row">
-                        <label for="model" class="col-sm-4 form-control-label">Model:</label>
-                        <div class="col-sm-8">
-                            <input type="text" class="form-control" name="model" placeholder="Model">
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="make" class="col-sm-4 form-control-label">Make:</label>
-                        <div class="col-sm-8">
-                            <input type="text" class="form-control" name="make" placeholder="Make">
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="serial" class="col-sm-4 form-control-label">Serial #:</label>
-                        <div class="col-sm-8">
-                            <input type="text" class="form-control" name="serial" placeholder="Serial">
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="ip" class="col-sm-4 form-control-label">IP:</label>
-                        <div class="col-sm-8">
-                            <input type="text" class="form-control" name="ip" placeholder="IP">
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="mac" class="col-sm-4 form-control-label">MAC Address (WiFi):</label>
-                        <div class="col-sm-8">
-                            <input type="text" class="form-control" name="mac" placeholder="MAC Address (Wifi)">
-                        </div>
-                    </div>
-
-                    {{ issue_date() }}
-
-                    {{ renewal_date() }}
-
-                    <div class="form-group row">
-                        <label for="condition" class="col-sm-4 form-control-label">Physical Condition:</label>
-                        <div class="col-sm-8">
-                            <input type="text" class="form-control" name="condition" placeholder="Physical Condition">
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="owner" class="col-sm-4 form-control-label">Owner:</label>
-                        <div class="col-sm-8">
-                            <input type="text" class="form-control" name="owner" placeholder="Owner">
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="location" class="col-sm-4 form-control-label">Location:</label>
-                        <div class="col-sm-8">
-                            <input type="text" class="form-control" name="location" placeholder="Location">
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="notes" class="col-sm-4 form-control-label">Notes:</label>
-                        <div class="col-sm-8">
-                            <input type="text" class="form-control" name="notes" placeholder="Notes">
-                        </div>
-                    </div>
-
-                    {{ statediv() }}
-
-                    {{ asset_kind() }}
-
-                    {{ asset_cost() }}
+                    {{ asset_fields() }}
 
                 </form>
 
@@ -214,85 +143,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         </div>
                     </div>
 
-                    <div class="form-group row">
-                        <label for="model" class="col-sm-4 form-control-label">Model:</label>
-                        <div class="col-sm-8">
-                            <input type="text" class="form-control" name="model" id="AssetFormModel"
-                                   placeholder="Model">
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="make" class="col-sm-4 form-control-label">Make:</label>
-                        <div class="col-sm-8">
-                            <input type="text" class="form-control" name="make" id="AssetFormMake" placeholder="Make">
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="serial" class="col-sm-4 form-control-label">Serial #:</label>
-                        <div class="col-sm-8">
-                            <input type="text" class="form-control" name="serial" id="AssetFormSerial"
-                                   placeholder="Serial">
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="ip" class="col-sm-4 form-control-label">IP:</label>
-                        <div class="col-sm-8">
-                            <input type="text" class="form-control" name="ip" id="AssetFormIp" placeholder="IP">
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="mac" class="col-sm-4 form-control-label">MAC Address (WiFi):</label>
-                        <div class="col-sm-8">
-                            <input type="text" class="form-control" name="mac" id="AssetFormMac"
-                                   placeholder="MAC Address (Wifi)">
-                        </div>
-                    </div>
-
-                    {{ issue_date() }}
-
-                    {{ renewal_date() }}
-
-                    <div class="form-group row">
-                        <label for="condition" class="col-sm-4 form-control-label">Physical Condition:</label>
-                        <div class="col-sm-8">
-                            <input type="text" class="form-control" name="condition" id="AssetFormCondition"
-                                   placeholder="Physical Condition">
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="owner" class="col-sm-4 form-control-label">Owner:</label>
-                        <div class="col-sm-8">
-                            <input type="text" class="form-control" name="owner" id="AssetFormOwner"
-                                   placeholder="Owner">
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="location" class="col-sm-4 form-control-label">Location:</label>
-                        <div class="col-sm-8">
-                            <input type="text" class="form-control" name="location" id="AssetFormLocation"
-                                   placeholder="Location">
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="notes" class="col-sm-4 form-control-label">Notes:</label>
-                        <div class="col-sm-8">
-                            <input type="text" class="form-control" name="notes" id="AssetFormNotes"
-                                   placeholder="Notes">
-                        </div>
-                    </div>
-
-                    {{ statediv() }}
-
-                    {{ asset_kind() }}
-
-                    {{ asset_cost() }}
+                    {{ asset_fields() }}
 
                 </form>
 

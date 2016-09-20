@@ -60,17 +60,98 @@
     <div class="col-sm-4">
         <label for="cost" class="col-sm-4 form-control-label">Cost:</label>
 
-            <input type="number" class="form-control" name="cost" placeholder="Cost"  id="AssetFormCost">
+        <input type="number" class="form-control" name="cost" placeholder="Cost" id="AssetFormCost">
 
-            <label for="currency" class="col-sm-4 form-control-label">Currency:</label>
-            <select name="currency" class="form-control" id="AssetFormCurrency" id="AssetFormCurrency">
-                <option value="USD">USD</option>
-                <option value="SEK">SEK</option>
-                <option value="CAD">CAD</option>
-                <option value="GBP">GBP</option>
-                <option value="NZD">NZD</option>
-            </select>
+        <label for="currency" class="col-sm-4 form-control-label">Currency:</label>
+        <select name="currency" class="form-control" id="AssetFormCurrency" id="AssetFormCurrency">
+            <option value="USD">USD</option>
+            <option value="SEK">SEK</option>
+            <option value="CAD">CAD</option>
+            <option value="GBP">GBP</option>
+            <option value="NZD">NZD</option>
+        </select>
 
     </div>
 </div>
+{% endmacro %}
+
+{% macro asset_fields() %}
+
+
+<div class="form-group row">
+    <label for="model" class="col-sm-4 form-control-label">Model:</label>
+    <div class="col-sm-8">
+        <input type="text" class="form-control" name="model" placeholder="Model" id="AssetFormModel">
+    </div>
+</div>
+
+<div class="form-group row">
+    <label for="make" class="col-sm-4 form-control-label">Make:</label>
+    <div class="col-sm-8">
+        <input type="text" class="form-control" name="make" placeholder="Make" id="AssetFormMake">
+    </div>
+</div>
+
+<div class="form-group row">
+    <label for="serial" class="col-sm-4 form-control-label">Serial #:</label>
+    <div class="col-sm-8">
+        <input type="text" class="form-control" name="serial" placeholder="Serial" id="AssetFormSerial">
+    </div>
+</div>
+
+<div class="form-group row">
+    <label for="ip" class="col-sm-4 form-control-label">IP:</label>
+    <div class="col-sm-8">
+        <input type="text" class="form-control" name="ip" placeholder="IP" id="AssetFormIp">
+    </div>
+</div>
+
+<div class="form-group row">
+    <label for="mac" class="col-sm-4 form-control-label">MAC Address (WiFi):</label>
+    <div class="col-sm-8">
+        <input type="text" class="form-control" name="mac"
+               placeholder="MAC Address (Wifi)"
+               id="AssetFormMac">
+    </div>
+</div>
+
+{{ issue_date() }}
+
+{{ renewal_date() }}
+
+<div class="form-group row">
+    <label for="condition" class="col-sm-4 form-control-label">Physical Condition:</label>
+    <div class="col-sm-8">
+        <input type="text" class="form-control" name="condition" placeholder="Physical Condition"
+               id="AssetFormCondition">
+    </div>
+</div>
+
+<div class="form-group row">
+    <label for="owner" class="col-sm-4 form-control-label">Owner:</label>
+    <div class="col-sm-8">
+        <input type="text" class="form-control" name="owner" placeholder="Owner" id="AssetFormOwner">
+    </div>
+</div>
+
+<div class="form-group row">
+    <label for="location" class="col-sm-4 form-control-label">Location:</label>
+    <div class="col-sm-8">
+        <input type="text" class="form-control" name="location" placeholder="Location" id="AssetFormLocation">
+    </div>
+</div>
+
+<div class="form-group row">
+    <label for="notes" class="col-sm-4 form-control-label">Notes:</label>
+    <div class="col-sm-8">
+        <input type="text" class="form-control" name="notes" placeholder="Notes"  id="AssetFormNotes">
+    </div>
+</div>
+
+{{ statediv() }}
+
+{{ asset_kind() }}
+
+{{ asset_cost() }}
+
 {% endmacro %}

@@ -22,13 +22,29 @@ $(document).ready(function() {
       "visible": false
     } ]
 
-  } );
+  });
 
   table.buttons().container().appendTo('#assets_wrapper .col-sm-6:eq(0)');
 
-} );
+});
+
+function resetForm(form) {
+    console.log("deleting form: " + JSON.stringify(form))
+    form.find('input:text, input:password, input:file, select, textarea').val('');
+    form.find('input:radio, input:checkbox')
+         .removeAttr('checked').removeAttr('selected');
+}
+
+$(document).ready(function() {
+    $('#assetAddCancel').on('click', function() { resetForm($('#assetAddForm')); });
+    $('#assetUpdateCancel').on('click', function() { resetForm($('#assetUpdateForm')); });
+    $('button.close').on('click', function() { resetForm($('#assetAddForm')); });
+    $('button.close').on('click', function() { resetForm($('#assetUpdateForm')); });
+});
+
 
 //open modal on asset click
+
 $(document).ready(function() {
   var table = $('#assets').DataTable();
 

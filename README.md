@@ -35,6 +35,7 @@ Warning: Testing will clear the local Neo4j database. Do not test if you have im
 ## Licence / Copyright
 
 This project is licensed under GNU AGPLv3. It can be found LICENSE.txt.
+It is also licensed under the Neo Technology Contributor License Agreement v1.0.
 
 ## Contact
 

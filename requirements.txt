@@ -2,7 +2,6 @@ apiclient==1.0.3
 click==6.6
 defusedxml==0.4.1
 Flask==0.11.1
-Flask-HTTPAuth==2.3.0
 Flask-Login==0.3.2
 Flask-OAuthlib==0.9.3
 google-api-python-client==1.5.1
@@ -25,3 +24,4 @@ uritemplate==0.6
 urllib3==1.16
 Werkzeug==0.11.10
 dateparser==0.4.0
+behave==1.2.5

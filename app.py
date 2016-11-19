@@ -32,8 +32,7 @@ from uuid import uuid4
 import apiclient
 import httplib2
 import os
-from flask import Flask, render_template, url_for, request, redirect, session, abort, flash, jsonify
-from flask_httpauth import HTTPBasicAuth
+from flask import Flask, render_template, url_for, request, redirect, session, abort, flash, jsonify, Response
 from oauth2client import client
 from parseXML import parseXML
 from py2neo import Graph
@@ -54,13 +53,26 @@ graph = Graph(os.environ.get('GRAPHSTORY_URL', DEFAULT_NEO_URL), bolt=False)
 UPLOAD_FOLDER = '/uploads'
 ALLOWED_EXTENSIONS = {'xml'}
 
-basic_auth = HTTPBasicAuth()
+def check_auth(username, password):
+    return username == os.environ.get('API_USER', None) and password == os.environ.get('API_PASSWORD', None)
 
+def authenticate():
+    return Response(
+    'Could not verify your access level for that URL.\n'
+    'You have to login with proper credentials', 401,
+    {'WWW-Authenticate': 'Basic realm="Login Required"'})
 
-@basic_auth.verify_password
-def verify_password(username, password):
-    return username == os.environ['API_USER'] and password == os.environ['API_PASSWORD']
-
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if 'API_USER' in os.environ:
+            if not auth or not check_auth(auth.username, auth.password):
+                return authenticate()
+            else:
+                return True
+        return f(*args, **kwargs)
+    return decorated
 
 def google_login(f):
     @wraps(f)
@@ -359,8 +371,9 @@ def disposed_endpoint():
                asset.cost as cost,
                asset.currency as currency""")
 
+
 @app.route('/api/v1/asset/new', methods=['POST'])
-@basic_auth.login_required
+@requires_auth
 def add_asset_from_api_and_return_json():
     add_asset_implementation(request)
     return jsonify({'message': 'OK'})

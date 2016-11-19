@@ -5,7 +5,7 @@
 # LEGAL #
 # =======#
 
-# Copyright (C) 2016 Neo Technology, Brandon Tsao
+# Copyright (C) 2016 Neo Technology
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published

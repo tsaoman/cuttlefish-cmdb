@@ -22,6 +22,6 @@ simplejson==3.8.2
 six==1.10.0
 uritemplate==0.6
 urllib3==1.16
-Werkzeug==0.11.10
+Werkzeug==0.15.3
 dateparser==0.4.0
 behave==1.2.5
